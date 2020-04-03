@@ -1,5 +1,3 @@
-'use strict';
-
 const TASK_AMOUNT = 3;
 
 const getMainMenuTemplate = () => {
