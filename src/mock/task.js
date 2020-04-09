@@ -1,13 +1,6 @@
+import {COLORS} from "../const.js";
 
 const WEEK = 7;
-const COLORS = [
-  `black`,
-  `yellow`,
-  `blue`,
-  `green`,
-  `pink`
-];
-
 const taskDescriptions = [
   `Изучить теорию`,
   `Выполнить домашку`,
