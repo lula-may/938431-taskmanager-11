@@ -33,7 +33,7 @@ const generateTask = () => {
     repeatingDays: generateRepeatingDays(),
     color: getRandomItem(COLORS),
     isArchive: getRandomBoolean(),
-    isFavourite: getRandomBoolean(),
+    isFavorite: getRandomBoolean(),
   };
 };
 
