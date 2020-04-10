@@ -6,6 +6,8 @@ const COLORS = [
   `pink`
 ];
 
+const DAYS = [`mo`, `tu`, `we`, `th`, `fr`, `sa`, `su`];
+
 const MONTH_NAMES = [
   `January`,
   `February`,
@@ -21,4 +23,4 @@ const MONTH_NAMES = [
   `December`,
 ];
 
-export {COLORS, MONTH_NAMES};
+export {COLORS, DAYS, MONTH_NAMES};
