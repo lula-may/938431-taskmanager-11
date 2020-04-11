@@ -3,7 +3,7 @@ import {formateTime} from "../utils.js";
 
 
 export const getTaskTemplate = (task) => {
-  const {description, dueDate, repeatingDays, color, isArchive, isFavourite} = task;
+  const {description, dueDate, repeatingDays, color, isArchive, isFavorite} = task;
   const isExpired = dueDate instanceof Date && dueDate < Date.now();
   const isDateShowing = !!dueDate;
   const date = isDateShowing ? `${dueDate.getDate()} ${MONTH_NAMES[dueDate.getMonth()]}` : ``;
@@ -11,7 +11,7 @@ export const getTaskTemplate = (task) => {
   const repeatClass = Object.values(repeatingDays).some(Boolean) ? `card--repeat` : ``;
   const deadlineClass = isExpired ? `card--deadline` : ``;
   const archiveButtonInactiveClass = isArchive ? `` : `card__btn--disabled`;
-  const favouriteButtonInactiveClass = isFavourite ? `` : `card__btn--disabled`;
+  const favouriteButtonInactiveClass = isFavorite ? `` : `card__btn--disabled`;
   return (
     `<article class="card card--${color} ${repeatClass} ${deadlineClass}">
       <div class="card__form">
