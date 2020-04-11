@@ -1,3 +1,6 @@
+const filterNames = [
+  `all`, `overdue`, `today`, `favorites`, `repeating`, `archive`
+];
 const getOverdueTasksAmount = (tasks) => {
   return tasks.reduce((acc, task) => {
     if (task.dueDate && task.dueDate < Date.now()) {
@@ -46,32 +49,20 @@ const getRepeatingTasksAmount = (tasks) => {
   }, 0);
 };
 
-export const generateFilters = (tasks) => {
-  return [
-    {
-      title: `all`,
-      count: tasks.length
-    },
-    {
-      title: `overdue`,
-      count: getOverdueTasksAmount(tasks)
-    },
-    {
-      title: `today`,
-      count: getTodayTasksAmount(tasks)
-    },
-    {
-      title: `favorites`,
-      count: getFavoriteTasksAmount(tasks)
-    },
-    {
-      title: `repeating`,
-      count: getRepeatingTasksAmount(tasks)
-    },
-    {
-      title: `isArchive`,
-      count: getArchiveTasksAmount(tasks)
-    }
-  ];
+const FilterCount = {
+  [`all`]: (task) => task.length,
+  [`overdue`]: getOverdueTasksAmount,
+  [`today`]: getTodayTasksAmount,
+  [`favorites`]: getFavoriteTasksAmount,
+  [`repeating`]: getRepeatingTasksAmount,
+  [`archive`]: getArchiveTasksAmount
 };
 
+export const generateFilters = (tasks) => {
+  return filterNames.map((title) => {
+    return {
+      title,
+      count: FilterCount[title](tasks)
+    };
+  });
+};
