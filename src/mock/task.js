@@ -6,7 +6,7 @@ const taskDescriptions = [
   `Выполнить домашку`,
   `Пройти интенсив на соточку`
 ];
-const DefaultRepeatingDays = {
+const defaultRepeatingDays = {
   "mo": false,
   "tu": false,
   "we": false,
@@ -23,7 +23,7 @@ const getRandomDate = () => {
   randomDate.setDate(randomDate.getDate() + getRandomIntegerFrom(-WEEK, WEEK));
   return randomDate;
 };
-const generateRepeatingDays = () => Object.assign({}, DefaultRepeatingDays, {"mo": getRandomBoolean()});
+const generateRepeatingDays = () => Object.assign({}, defaultRepeatingDays, {"mo": getRandomBoolean()});
 
 const generateTask = () => {
   const dueDate = Math.random() < 0.5 ? getRandomDate() : null;

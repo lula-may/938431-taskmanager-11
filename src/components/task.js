@@ -1,5 +1,5 @@
 import {MONTH_NAMES} from "../const.js";
-import {formateTime} from "../utils.js";
+import {formatTime} from "../utils.js";
 
 
 export const getTaskTemplate = (task) => {
@@ -7,7 +7,7 @@ export const getTaskTemplate = (task) => {
   const isExpired = dueDate instanceof Date && dueDate < Date.now();
   const isDateShowing = !!dueDate;
   const date = isDateShowing ? `${dueDate.getDate()} ${MONTH_NAMES[dueDate.getMonth()]}` : ``;
-  const time = isDateShowing ? `${formateTime(dueDate)}` : ``;
+  const time = isDateShowing ? `${formatTime(dueDate)}` : ``;
   const repeatClass = Object.values(repeatingDays).some(Boolean) ? `card--repeat` : ``;
   const deadlineClass = isExpired ? `card--deadline` : ``;
   const archiveButtonInactiveClass = isArchive ? `` : `card__btn--disabled`;

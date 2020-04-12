@@ -1,21 +1,22 @@
-import {formateTime} from "../utils.js";
+import {formatTime} from "../utils.js";
 import {COLORS, DAYS, MONTH_NAMES} from "../const.js";
 
 const createRepeatingDaysMarkup = (days, repeatingDays) => {
   return days
     .map((day, index) => {
       const isRepeating = repeatingDays[day];
-      return (`<input
-        class="visually-hidden card__repeat-day-input"
-        type="checkbox"
-        id="repeat-${day}-${index}"
-        name="repeat"
-        value="${day}"
-        ${isRepeating ? `checked` : ``}
-      />
-      <label class="card__repeat-day" for="repeat-${day}-${index}"
-        >${day}</label
-      >`
+      return (
+        `<input
+          class="visually-hidden card__repeat-day-input"
+          type="checkbox"
+          id="repeat-${day}-${index}"
+          name="repeat"
+          value="${day}"
+          ${isRepeating ? `checked` : ``}
+        />
+        <label class="card__repeat-day" for="repeat-${day}-${index}">
+          ${day}
+        </label>`
       );
     })
     .join(`\n`);
@@ -36,8 +37,8 @@ const createColorsMarkup = (colors, currentColor) => {
       <label
         for="color-${color}-${index}"
         class="card__color card__color--${color}"
-        >black</label
-      >`
+      >black
+      </label>`
       );
     })
     .join(`\n`);
@@ -47,9 +48,9 @@ export const getEditTaskTemplate = (task) => {
   const {description, dueDate, repeatingDays, color} = task;
   const isExpired = dueDate instanceof Date && dueDate < Date.now();
   const isDateShowing = !!dueDate;
-  const isRepeating = Object.values(repeatingDays).some(Boolean);
+  const isRepeating = Object.values(repeatingDays).includes(true);
   const date = isDateShowing ? `${dueDate.getDate()} ${MONTH_NAMES[dueDate.getMonth()]}` : ``;
-  const time = isDateShowing ? `${formateTime(dueDate)}` : ``;
+  const time = isDateShowing ? `${formatTime(dueDate)}` : ``;
   const repeatClass = isRepeating ? `card--repeat` : ``;
   const deadlineClass = isExpired ? `card--deadline` : ``;
   const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, repeatingDays);
