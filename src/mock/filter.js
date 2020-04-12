@@ -1,3 +1,4 @@
+const DEFAULT_FILTER = `all`;
 const filterNames = [
   `all`, `overdue`, `today`, `favorites`, `repeating`, `archive`
 ];
@@ -62,7 +63,8 @@ export const generateFilters = (tasks) => {
   return filterNames.map((title) => {
     return {
       title,
-      count: FilterCount[title](tasks)
+      count: FilterCount[title](tasks),
+      isDefault: title === DEFAULT_FILTER,
     };
   });
 };

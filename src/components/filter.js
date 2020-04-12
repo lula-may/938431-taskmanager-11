@@ -1,12 +1,12 @@
-const getfilterMarkup = (filter, isChecked) => {
-  const {title, count} = filter;
+const getfilterMarkup = (filter) => {
+  const {title, count, isDefault} = filter;
   return (
     `<input
       type="radio"
       id="filter__${title}"
       class="filter__input visually-hidden"
       name="filter"
-      ${isChecked ? `checked` : ``}
+      ${isDefault ? `checked` : ``}
     />
     <label for="filter__${title}" class="filter__label">
       ${title} <span class="filter__${title}-count">${count}</span></label
