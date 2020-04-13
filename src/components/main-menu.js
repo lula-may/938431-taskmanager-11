@@ -7,9 +7,9 @@ export const getMainMenuTemplate = () => {
         id="control__new-task"
         class="control__input visually-hidden"
       />
-      <label for="control__new-task" class="control__label control__label--new-task"
-        >+ ADD NEW TASK</label
-      >
+      <label for="control__new-task" class="control__label control__label--new-task">
+        + ADD NEW TASK
+      </label>
       <input
         type="radio"
         name="control"
@@ -24,9 +24,7 @@ export const getMainMenuTemplate = () => {
         id="control__statistic"
         class="control__input visually-hidden"
       />
-      <label for="control__statistic" class="control__label"
-        >STATISTICS</label
-      >
+      <label for="control__statistic" class="control__label">STATISTICS</label>
     </section>`
   );
 };
