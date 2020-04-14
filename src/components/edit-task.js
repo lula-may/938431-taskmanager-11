@@ -1,4 +1,4 @@
-import {formatTime, getElement} from "../utils.js";
+import {formatTime, createElement} from "../utils.js";
 import {COLORS, DAYS, MONTH_NAMES} from "../const.js";
 
 const createRepeatingDaysMarkup = (days, repeatingDays) => {
@@ -133,9 +133,9 @@ export default class EditTask {
     return getEditTaskTemplate(this._task);
   }
 
-  getEditTaskElement() {
+  getElement() {
     if (!this._element) {
-      this._element = getElement(this._task);
+      this._element = createElement(this._task);
     }
     return this._element;
   }

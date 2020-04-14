@@ -13,7 +13,7 @@ const formatTime = (date) => {
   return `${hours}:${minutes}`;
 };
 
-const getElement = (template) => {
+const createElement = (template) => {
   const divElement = document.createElement(`div`);
   divElement.innerHTML = template;
   return divElement.firstChild;
@@ -30,4 +30,4 @@ const render = (container, element, place) => {
   }
 };
 
-export {RenderPosition, formatTime, getElement, render};
+export {RenderPosition, formatTime, createElement, render};

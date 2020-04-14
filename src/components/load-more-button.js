@@ -1,4 +1,4 @@
-import {getElement} from "../utils.js";
+import {createElement} from "../utils.js";
 
 export default class LoadMoreButton {
   constructor() {
@@ -9,9 +9,9 @@ export default class LoadMoreButton {
     return `<button class="load-more" type="button">load more</button>`;
   }
 
-  getMoreButtonElement() {
+  getElement() {
     if (!this._element) {
-      this._element = getElement(this.getTemplate());
+      this._element = createElement(this.getTemplate());
     }
     return this._element;
   }

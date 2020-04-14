@@ -1,4 +1,4 @@
-import {getElement} from "../utils.js";
+import {createElement} from "../utils.js";
 const getMainMenuTemplate = () => {
   return (
     `<section class="control__btn-wrap">
@@ -39,9 +39,9 @@ export default class MainMenu {
     return getMainMenuTemplate();
   }
 
-  getMainMenuElement() {
+  getElement() {
     if (!this._element) {
-      this._element = getElement(this.getTemplate());
+      this._element = createElement(this.getTemplate());
     }
     return this._element;
   }

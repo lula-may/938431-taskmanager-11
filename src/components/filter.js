@@ -1,4 +1,4 @@
-import {getElement} from "../utils.js";
+import {createElement} from "../utils.js";
 
 const getfilterMarkup = (filter) => {
   const {title, count, isDefault} = filter;
@@ -36,9 +36,9 @@ export default class Filter {
     return getFilterTemplate(this._filters);
   }
 
-  getFilterElement() {
+  getElement() {
     if (!this._element) {
-      this._element = getElement(this._filters);
+      this._element = createElement(this._filters);
     }
     return this._element;
   }

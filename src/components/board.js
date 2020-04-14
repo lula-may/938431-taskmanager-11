@@ -1,4 +1,4 @@
-import {getElement} from "../utils.js";
+import {createElement} from "../utils.js";
 
 export default class Board {
   constructor() {
@@ -9,9 +9,9 @@ export default class Board {
     return `<section class="board container"></section>`;
   }
 
-  getBoardElement() {
+  getElement() {
     if (!this._element) {
-      this._element = getElement(this.getTemplate());
+      this._element = createElement(this.getTemplate());
     }
     return this._element;
   }

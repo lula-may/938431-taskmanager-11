@@ -1,5 +1,5 @@
 import {MONTH_NAMES} from "../const.js";
-import {formatTime, getElement} from "../utils.js";
+import {formatTime, createElement} from "../utils.js";
 
 const getTaskTemplate = (task) => {
   const {description, dueDate, repeatingDays, color, isArchive, isFavorite} = task;
@@ -68,9 +68,9 @@ export default class Task {
     return getTaskTemplate(this._task);
   }
 
-  getTaskElement() {
+  getElement() {
     if (!this._element) {
-      this._element = getElement(this._task);
+      this._element = createElement(this._task);
     }
     return this._element;
   }
