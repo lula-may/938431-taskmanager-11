@@ -1,3 +1,5 @@
+import {getElement} from "../utils.js";
+
 const getfilterMarkup = (filter) => {
   const {title, count, isDefault} = filter;
   return (
@@ -13,7 +15,8 @@ const getfilterMarkup = (filter) => {
     >`
   );
 };
-export const getFilterTemplate = (filters) => {
+
+const getFilterTemplate = (filters) => {
   const filtersMarkup = filters.map((item, i) => getfilterMarkup(item, i === 0))
   .join(`\n`);
   return (
@@ -22,3 +25,25 @@ export const getFilterTemplate = (filters) => {
     </section>`
   );
 };
+
+export default class Filter {
+  constructor(filters) {
+    this._filters = filters;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return getFilterTemplate(this._filters);
+  }
+
+  getFilterElement() {
+    if (!this._element) {
+      this._element = getElement(this._filters);
+    }
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
