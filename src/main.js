@@ -24,48 +24,57 @@ const renderTask = (taskListElement, task) => {
     taskListElement.replaceChild(taskComponent.getElement(), taskEditComponent.getElement());
   };
 
-  const taskComponent = new TaskComponent(task).getElement();
+  const taskComponent = new TaskComponent(task);
   const editButton = taskComponent.getElement().querySelector(`.card__btn--edit`);
   editButton.addEventListener(`click`, onEditButtonClick);
 
-  const taskEditComponent = new EditTaskComponent(task).getElement();
+  const taskEditComponent = new EditTaskComponent(task);
   const editForm = taskEditComponent.getElement().querySelector(`.card__form`);
   editForm.addEventListener(`submit`, onEditFormSubmit);
 
   render(taskListElement, taskComponent.getElement(), RenderPosition.BEFOREEND);
 };
 
-const renderBoard = () => {};
+const renderBoard = (boardComponent, tasks) => {
+  // Отрисовываю блок сортировки и контейнер для карточек задач
+  render(boardComponent.getElement(), new SortComponent().getElement(), RenderPosition.BEFOREEND);
+  render(boardComponent.getElement(), new TasksComponent().getElement(), RenderPosition.BEFOREEND);
+
+  const taskListElement = boardComponent.getElement().querySelector(`.board__tasks`);
+  // Отрисовываю первую порцию карточек
+  let showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
+  tasks.slice(0, showingTasksCount)
+    .forEach((task) => {
+      renderTask(taskListElement, task);
+    });
+
+  // Кнопка Load More c обработчиком
+  const loadMoreButtonComponent = new LoadMoreButtonComponent();
+  render(boardComponent.getElement(), loadMoreButtonComponent.getElement(), RenderPosition.BEFOREEND);
+
+  loadMoreButtonComponent.getElement().addEventListener(`click`, () => {
+    const prevTasksCount = showingTasksCount;
+    showingTasksCount += SHOWING_TASKS_AMOUNT_BY_BUTTON;
+    tasks.slice(prevTasksCount, showingTasksCount)
+      .forEach((task) => renderTask(taskListElement, task));
+    if (showingTasksCount >= TASK_AMOUNT) {
+      loadMoreButtonComponent.remove();
+      loadMoreButtonComponent.removeElement();
+    }
+  });
+};
 
 const tasks = generateTasks(TASK_AMOUNT);
 const filters = generateFilters(tasks);
 
 const siteMainElement = document.querySelector(`.main`);
 const siteMenuElement = siteMainElement.querySelector(`.main__control`);
+const boardComponent = new BoardComponent();
 
 render(siteMenuElement, new MainMenuComponent().getElement(), RenderPosition.BEFOREEND);
-render(siteMainElement, new BoardComponent().getElement(), RenderPosition.BEFOREEND);
-// render(siteMainElement, getFilterTemplate(filters));
+render(siteMainElement, new FilterComponent(filters).getElement(), RenderPosition.BEFOREEND);
+render(siteMainElement, boardComponent.getElement(), RenderPosition.BEFOREEND);
 
-// const boardElement = siteMainElement.querySelector(`.board`);
-// const taskListElement = boardElement.querySelector(`.board__tasks`);
+renderBoard(boardComponent, tasks);
 
-// render(taskListElement, getEditTaskTemplate(tasks[0]));
-
-// let showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
-// tasks.slice(1, showingTasksCount)
-//   .forEach((task) => render(taskListElement, getTaskTemplate(task)));
-
-// render(boardElement, getLoadMoreButtonTemplate());
-
-// const loadMoreButtonElement = document.querySelector(`.load-more`);
-// loadMoreButtonElement.addEventListener(`click`, () => {
-//   const prevTasksCount = showingTasksCount;
-//   showingTasksCount += SHOWING_TASKS_AMOUNT_BY_BUTTON;
-//   tasks.slice(prevTasksCount, showingTasksCount)
-//   .forEach((task) => render(taskListElement, getTaskTemplate(task)));
-//   if (showingTasksCount >= TASK_AMOUNT) {
-//     loadMoreButtonElement.remove();
-//   }
-// });
 
