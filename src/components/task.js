@@ -70,7 +70,7 @@ export default class Task {
 
   getElement() {
     if (!this._element) {
-      this._element = createElement(this._task);
+      this._element = createElement(this.getTemplate());
     }
     return this._element;
   }
