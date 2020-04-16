@@ -1,4 +1,5 @@
-export const getMainMenuTemplate = () => {
+import {createElement} from "../utils.js";
+const getMainMenuTemplate = () => {
   return (
     `<section class="control__btn-wrap">
       <input
@@ -28,3 +29,24 @@ export const getMainMenuTemplate = () => {
     </section>`
   );
 };
+
+export default class MainMenu {
+  constructor() {
+    this._element = null;
+  }
+
+  getTemplate() {
+    return getMainMenuTemplate();
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
