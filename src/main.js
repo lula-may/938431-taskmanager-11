@@ -9,7 +9,7 @@ import TaskComponent from "./components/task.js";
 import TasksComponent from "./components/tasks.js";
 import {generateTasks} from "./mock/task.js";
 import {generateFilters} from "./mock/filter.js";
-import {render} from "./utils/render.js";
+import {render, replace, remove} from "./utils/render.js";
 
 const TASK_AMOUNT = 20;
 const SHOWING_TASKS_AMOUNT_ON_START = 8;
@@ -17,11 +17,11 @@ const SHOWING_TASKS_AMOUNT_BY_BUTTON = 8;
 
 const renderTask = (taskListElement, task) => {
   const replaceTaskToEdit = () => {
-    taskListElement.replaceChild(taskEditComponent.getElement(), taskComponent.getElement());
+    replace(taskEditComponent, taskComponent);
   };
 
   const replaceEditToTask = () => {
-    taskListElement.replaceChild(taskComponent.getElement(), taskEditComponent.getElement());
+    replace(taskComponent, taskEditComponent);
   };
 
   const onEscKeydown = (evt) => {
@@ -51,18 +51,18 @@ const renderTask = (taskListElement, task) => {
   const editForm = taskEditComponent.getElement().querySelector(`.card__form`);
   editForm.addEventListener(`submit`, onEditFormSubmit);
 
-  render(taskListElement, taskComponent.getElement());
+  render(taskListElement, taskComponent);
 };
 
 const renderBoard = (boardComponent, tasks) => {
   const isAllTasksArchived = tasks.every((task) => task.isArchive);
   if (isAllTasksArchived) {
-    render(boardComponent.getElement(), new NoTaskComponent().getElement());
+    render(boardComponent.getElement(), new NoTaskComponent());
     return;
   }
   // Отрисовываю блок сортировки и контейнер для карточек задач
-  render(boardComponent.getElement(), new SortComponent().getElement());
-  render(boardComponent.getElement(), new TasksComponent().getElement());
+  render(boardComponent.getElement(), new SortComponent());
+  render(boardComponent.getElement(), new TasksComponent());
 
   const taskListElement = boardComponent.getElement().querySelector(`.board__tasks`);
   // Отрисовываю первую порцию карточек
@@ -74,7 +74,7 @@ const renderBoard = (boardComponent, tasks) => {
 
   // Кнопка Load More c обработчиком
   const loadMoreButtonComponent = new LoadMoreButtonComponent();
-  render(boardComponent.getElement(), loadMoreButtonComponent.getElement());
+  render(boardComponent.getElement(), loadMoreButtonComponent);
 
   loadMoreButtonComponent.getElement().addEventListener(`click`, () => {
     const prevTasksCount = showingTasksCount;
@@ -82,8 +82,7 @@ const renderBoard = (boardComponent, tasks) => {
     tasks.slice(prevTasksCount, showingTasksCount)
       .forEach((task) => renderTask(taskListElement, task));
     if (showingTasksCount >= TASK_AMOUNT) {
-      loadMoreButtonComponent.remove();
-      loadMoreButtonComponent.removeElement();
+      remove(loadMoreButtonComponent);
     }
   });
 };
@@ -95,9 +94,9 @@ const siteMainElement = document.querySelector(`.main`);
 const siteMenuElement = siteMainElement.querySelector(`.main__control`);
 const boardComponent = new BoardComponent();
 
-render(siteMenuElement, new MainMenuComponent().getElement());
-render(siteMainElement, new FilterComponent(filters).getElement());
-render(siteMainElement, boardComponent.getElement());
+render(siteMenuElement, new MainMenuComponent());
+render(siteMainElement, new FilterComponent(filters));
+render(siteMainElement, boardComponent);
 
 renderBoard(boardComponent, tasks);
 

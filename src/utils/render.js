@@ -5,15 +5,32 @@ const createElement = (template) => {
   return divElement.firstChild;
 };
 
-const render = (container, element, place = `beforeend`) => {
+const render = (container, component, place = `beforeend`) => {
   if (place === `afterbegin`) {
-    container.prepend(element);
+    container.prepend(component.getElement());
     return;
   }
   if (place === `beforeend`) {
-    container.append(element);
+    container.append(component.getElement());
     return;
   }
 };
 
-export {createElement, render};
+const replace = (newComponent, oldComponent) => {
+  const parentElement = oldComponent.getElement().parentElement;
+  const newElement = newComponent.getElement();
+  const oldElement = oldComponent.getElement();
+
+  const elementsExist = !!(newElement && oldElement && parentElement);
+
+  if (elementsExist) {
+    parentElement.replaceChild(newElement, oldElement);
+  }
+};
+
+const remove = (component) => {
+  component.getElement().remove();
+  component.removeElement();
+};
+
+export {createElement, render, replace, remove};
