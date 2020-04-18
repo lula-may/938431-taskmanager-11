@@ -45,45 +45,47 @@ const renderTask = (taskListElement, task) => {
 
   render(taskListElement, taskComponent);
 };
-const renderBoard = (boardComponent, tasks) => {
-  const isAllTasksArchived = tasks.every((task) => task.isArchive);
-  if (isAllTasksArchived) {
-    render(boardComponent.getElement(), new NoTaskComponent());
-    return;
-  }
-  // Отрисовываю блок сортировки и контейнер для карточек задач
-  render(boardComponent.getElement(), new SortComponent());
-  render(boardComponent.getElement(), new TasksComponent());
-
-  const taskListElement = boardComponent.getElement().querySelector(`.board__tasks`);
-  // Отрисовываю первую порцию карточек
-  let showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
-  tasks.slice(0, showingTasksCount)
-    .forEach((task) => {
-      renderTask(taskListElement, task);
-    });
-
-  // Кнопка Load More c обработчиком
-  const loadMoreButtonComponent = new LoadMoreButtonComponent();
-  render(boardComponent.getElement(), loadMoreButtonComponent);
-
-  loadMoreButtonComponent.setClickHandler(() => {
-    const prevTasksCount = showingTasksCount;
-    showingTasksCount += SHOWING_TASKS_AMOUNT_BY_BUTTON;
-    tasks.slice(prevTasksCount, showingTasksCount)
-      .forEach((task) => renderTask(taskListElement, task));
-    if (showingTasksCount >= tasks.length) {
-      remove(loadMoreButtonComponent);
-    }
-  });
-};
 
 export default class BoardController {
   constructor(container) {
     this._container = container;
+
+    this._noTaskComponent = new NoTaskComponent();
+    this._sortComponent = new SortComponent();
+    this._tasksComponent = new TasksComponent();
+    this._loadMoreButtonComponent = new LoadMoreButtonComponent();
   }
 
   render(tasks) {
-    renderBoard(this._container, tasks);
+    const container = this._container.getElement();
+    const isAllTasksArchived = tasks.every((task) => task.isArchive);
+    if (isAllTasksArchived) {
+      render(container, this._noTaskComponent);
+      return;
+    }
+    // Отрисовываю блок сортировки и контейнер для карточек задач
+    render(container, this._sortComponent);
+    render(container, this._tasksComponent);
+
+    const taskListElement = container.querySelector(`.board__tasks`);
+    // Отрисовываю первую порцию карточек
+    let showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
+    tasks.slice(0, showingTasksCount)
+      .forEach((task) => {
+        renderTask(taskListElement, task);
+      });
+
+    // Кнопка Load More c обработчиком
+    render(container, this._loadMoreButtonComponent);
+
+    this._loadMoreButtonComponent.setClickHandler(() => {
+      const prevTasksCount = showingTasksCount;
+      showingTasksCount += SHOWING_TASKS_AMOUNT_BY_BUTTON;
+      tasks.slice(prevTasksCount, showingTasksCount)
+        .forEach((task) => renderTask(taskListElement, task));
+      if (showingTasksCount >= tasks.length) {
+        remove(this._loadMoreButtonComponent);
+      }
+    });
   }
 }

@@ -6,7 +6,7 @@ import {generateFilters} from "./mock/filter.js";
 import {render} from "./utils/render.js";
 import BoardController from "./controllers/board-controller.js";
 
-const TASK_AMOUNT = 20;
+const TASK_AMOUNT = 0;
 const tasks = generateTasks(TASK_AMOUNT);
 const filters = generateFilters(tasks);
 
