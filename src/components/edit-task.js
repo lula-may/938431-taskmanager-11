@@ -1,4 +1,4 @@
-import {formatTime} from "../utils.js";
+import {formatTime} from "../utils/common.js";
 import {COLORS, DAYS, MONTH_NAMES} from "../const.js";
 import AbstractComponent from "./abstract-component.js";
 
