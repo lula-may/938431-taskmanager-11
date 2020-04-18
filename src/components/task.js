@@ -2,6 +2,7 @@ import {MONTH_NAMES} from "../const.js";
 import {formatTime} from "../utils/common.js";
 import AbstractComponent from "./abstract-component.js";
 
+
 const getTaskTemplate = (task) => {
   const {description, dueDate, repeatingDays, color, isArchive, isFavorite} = task;
   const isExpired = dueDate instanceof Date && dueDate < Date.now();
@@ -68,4 +69,10 @@ export default class Task extends AbstractComponent {
   getTemplate() {
     return getTaskTemplate(this._task);
   }
+
+  setEditButtonClickHandler(handler) {
+    const editButton = this.getElement().querySelector(`.card__btn--edit`);
+    editButton.addEventListener(`click`, handler);
+  }
 }
+

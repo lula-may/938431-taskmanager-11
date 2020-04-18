@@ -133,4 +133,9 @@ export default class EditTask extends AbstractComponent {
   getTemplate() {
     return getEditTaskTemplate(this._task);
   }
+
+  setEditFormSubmitHandler(handler) {
+    const editForm = this.getElement().querySelector(`.card__form`);
+    editForm.addEventListener(`submit`, handler);
+  }
 }
