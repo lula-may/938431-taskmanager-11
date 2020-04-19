@@ -42,7 +42,6 @@ export default class Sort extends AbstractComponent {
       }
 
       this._currentSortType = sortType;
-      console.log(`Новый тип сортировки: ${sortType}`);
       handler(sortType);
     });
   }
@@ -51,3 +50,5 @@ export default class Sort extends AbstractComponent {
     this._sortType = sortType;
   }
 }
+
+export {SortType};

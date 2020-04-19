@@ -47,6 +47,12 @@ const renderTask = (taskListElement, task) => {
   render(taskListElement, taskComponent);
 };
 
+const renderTasks = (taskListElement, tasks) => {
+  tasks.forEach((task) => {
+    renderTask(taskListElement, task);
+  });
+
+};
 export default class Board {
   constructor(container) {
     this._container = container;
@@ -58,15 +64,16 @@ export default class Board {
   }
 
   render(tasks) {
+    let showingTasks = tasks.slice();
     const renderLoadMore = () => {
       render(container, this._loadMoreButtonComponent);
 
       this._loadMoreButtonComponent.setClickHandler(() => {
         const prevTasksCount = showingTasksCount;
         showingTasksCount += SHOWING_TASKS_AMOUNT_BY_BUTTON;
-        tasks.slice(prevTasksCount, showingTasksCount)
+        showingTasks.slice(prevTasksCount, showingTasksCount)
           .forEach((task) => renderTask(taskListElement, task));
-        if (showingTasksCount >= tasks.length) {
+        if (showingTasksCount >= showingTasks.length) {
           remove(this._loadMoreButtonComponent);
         }
       });
@@ -88,10 +95,7 @@ export default class Board {
     const taskListElement = container.querySelector(`.board__tasks`);
     // Отрисовываю первую порцию карточек
     let showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
-    tasks.slice(0, showingTasksCount)
-      .forEach((task) => {
-        renderTask(taskListElement, task);
-      });
+    renderTasks(taskListElement, showingTasks.slice(0, showingTasksCount));
 
     // Кнопка Load More c обработчиком
     renderLoadMore();
@@ -101,11 +105,8 @@ export default class Board {
       // Удалить задачи с доски, запустить фильтр, отрисовать новые карточки задач
       taskListElement.innerHTML = ``;
       showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
-      const sortedTasks = getSortedTasks(tasks, sortType);
-      sortedTasks.slice(0, showingTasksCount)
-        .forEach((task) => {
-          renderTask(taskListElement, task);
-        });
+      showingTasks = getSortedTasks(tasks, sortType);
+      renderTasks(taskListElement, showingTasks.slice(0, showingTasksCount));
       renderLoadMore();
     });
   }

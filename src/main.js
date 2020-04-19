@@ -4,7 +4,7 @@ import MainMenuComponent from "./components/main-menu.js";
 import {generateTasks} from "./mock/task.js";
 import {generateFilters} from "./mock/filter.js";
 import {render} from "./utils/render.js";
-import BoardController from "./controllers/board-controller.js";
+import BoardController from "./controllers/board.js";
 
 const TASK_AMOUNT = 20;
 const tasks = generateTasks(TASK_AMOUNT);
