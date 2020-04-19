@@ -5,6 +5,7 @@ import SortComponent from "../components/sort.js";
 import TaskComponent from "../components/task.js";
 import TasksComponent from "../components/tasks.js";
 import {render, replace, remove} from "../utils/render.js";
+import {getSortedTasks} from "../utils/data.js";
 
 const SHOWING_TASKS_AMOUNT_ON_START = 8;
 const SHOWING_TASKS_AMOUNT_BY_BUTTON = 8;
@@ -46,7 +47,7 @@ const renderTask = (taskListElement, task) => {
   render(taskListElement, taskComponent);
 };
 
-export default class BoardController {
+export default class Board {
   constructor(container) {
     this._container = container;
 
@@ -57,14 +58,31 @@ export default class BoardController {
   }
 
   render(tasks) {
+    const renderLoadMore = () => {
+      render(container, this._loadMoreButtonComponent);
+
+      this._loadMoreButtonComponent.setClickHandler(() => {
+        const prevTasksCount = showingTasksCount;
+        showingTasksCount += SHOWING_TASKS_AMOUNT_BY_BUTTON;
+        tasks.slice(prevTasksCount, showingTasksCount)
+          .forEach((task) => renderTask(taskListElement, task));
+        if (showingTasksCount >= tasks.length) {
+          remove(this._loadMoreButtonComponent);
+        }
+      });
+    };
+
     const container = this._container.getElement();
     const isAllTasksArchived = tasks.every((task) => task.isArchive);
     if (isAllTasksArchived) {
       render(container, this._noTaskComponent);
       return;
     }
-    // Отрисовываю блок сортировки и контейнер для карточек задач
+
+    // Отрисовываю блок сортировки
     render(container, this._sortComponent);
+
+    // Отрисовываю контейнер для карточек задач
     render(container, this._tasksComponent);
 
     const taskListElement = container.querySelector(`.board__tasks`);
@@ -76,16 +94,19 @@ export default class BoardController {
       });
 
     // Кнопка Load More c обработчиком
-    render(container, this._loadMoreButtonComponent);
+    renderLoadMore();
 
-    this._loadMoreButtonComponent.setClickHandler(() => {
-      const prevTasksCount = showingTasksCount;
-      showingTasksCount += SHOWING_TASKS_AMOUNT_BY_BUTTON;
-      tasks.slice(prevTasksCount, showingTasksCount)
-        .forEach((task) => renderTask(taskListElement, task));
-      if (showingTasksCount >= tasks.length) {
-        remove(this._loadMoreButtonComponent);
-      }
+    // Навешиваю обработчик клика на блок сортировки
+    this._sortComponent.setSortTypeChangeHandler((sortType) => {
+      // Удалить задачи с доски, запустить фильтр, отрисовать новые карточки задач
+      taskListElement.innerHTML = ``;
+      showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
+      const sortedTasks = getSortedTasks(tasks, sortType);
+      sortedTasks.slice(0, showingTasksCount)
+        .forEach((task) => {
+          renderTask(taskListElement, task);
+        });
+      renderLoadMore();
     });
   }
 }
