@@ -5,6 +5,7 @@ import SortComponent from "../components/sort.js";
 import TaskComponent from "../components/task.js";
 import TasksComponent from "../components/tasks.js";
 import {render, replace, remove} from "../utils/render.js";
+import {getSortedTasks} from "../utils/data.js";
 
 const SHOWING_TASKS_AMOUNT_ON_START = 8;
 const SHOWING_TASKS_AMOUNT_BY_BUTTON = 8;
@@ -46,7 +47,13 @@ const renderTask = (taskListElement, task) => {
   render(taskListElement, taskComponent);
 };
 
-export default class BoardController {
+const renderTasks = (taskListElement, tasks) => {
+  tasks.forEach((task) => {
+    renderTask(taskListElement, task);
+  });
+
+};
+export default class Board {
   constructor(container) {
     this._container = container;
 
@@ -57,35 +64,50 @@ export default class BoardController {
   }
 
   render(tasks) {
+    let showingTasks = tasks.slice();
+    const renderLoadMore = () => {
+      render(container, this._loadMoreButtonComponent);
+
+      this._loadMoreButtonComponent.setClickHandler(() => {
+        const prevTasksCount = showingTasksCount;
+        showingTasksCount += SHOWING_TASKS_AMOUNT_BY_BUTTON;
+        showingTasks.slice(prevTasksCount, showingTasksCount)
+          .forEach((task) => renderTask(taskListElement, task));
+        if (showingTasksCount >= showingTasks.length) {
+          remove(this._loadMoreButtonComponent);
+        }
+      });
+    };
+
     const container = this._container.getElement();
     const isAllTasksArchived = tasks.every((task) => task.isArchive);
     if (isAllTasksArchived) {
       render(container, this._noTaskComponent);
       return;
     }
-    // Отрисовываю блок сортировки и контейнер для карточек задач
+
+    // Отрисовываю блок сортировки
     render(container, this._sortComponent);
+
+    // Отрисовываю контейнер для карточек задач
     render(container, this._tasksComponent);
 
     const taskListElement = container.querySelector(`.board__tasks`);
     // Отрисовываю первую порцию карточек
     let showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
-    tasks.slice(0, showingTasksCount)
-      .forEach((task) => {
-        renderTask(taskListElement, task);
-      });
+    renderTasks(taskListElement, showingTasks.slice(0, showingTasksCount));
 
     // Кнопка Load More c обработчиком
-    render(container, this._loadMoreButtonComponent);
+    renderLoadMore();
 
-    this._loadMoreButtonComponent.setClickHandler(() => {
-      const prevTasksCount = showingTasksCount;
-      showingTasksCount += SHOWING_TASKS_AMOUNT_BY_BUTTON;
-      tasks.slice(prevTasksCount, showingTasksCount)
-        .forEach((task) => renderTask(taskListElement, task));
-      if (showingTasksCount >= tasks.length) {
-        remove(this._loadMoreButtonComponent);
-      }
+    // Навешиваю обработчик клика на блок сортировки
+    this._sortComponent.setSortTypeChangeHandler((sortType) => {
+      // Удалить задачи с доски, запустить фильтр, отрисовать новые карточки задач
+      taskListElement.innerHTML = ``;
+      showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
+      showingTasks = getSortedTasks(tasks, sortType);
+      renderTasks(taskListElement, showingTasks.slice(0, showingTasksCount));
+      renderLoadMore();
     });
   }
 }
