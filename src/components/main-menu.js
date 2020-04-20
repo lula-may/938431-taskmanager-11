@@ -1,4 +1,5 @@
-import {createElement} from "../utils.js";
+import AbstractComponent from "./abstract-component.js";
+
 const getMainMenuTemplate = () => {
   return (
     `<section class="control__btn-wrap">
@@ -30,23 +31,8 @@ const getMainMenuTemplate = () => {
   );
 };
 
-export default class MainMenu {
-  constructor() {
-    this._element = null;
-  }
-
+export default class MainMenu extends AbstractComponent {
   getTemplate() {
     return getMainMenuTemplate();
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }
