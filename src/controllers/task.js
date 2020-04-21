@@ -1,6 +1,6 @@
 import TaskComponent from "../components/task.js";
 import EditTaskComponent from "../components/edit-task.js";
-import {render, replace} from "../utils.render";
+import {render, replace} from "../utils/render";
 
 export default class TaskController {
   constructor(container) {
@@ -8,6 +8,8 @@ export default class TaskController {
 
     this._taskComponent = null;
     this._editTaskComponent = null;
+
+    this._onEscKeydown = this._onEscKeydown.bind(this);
   }
 
   _replaceTaskToEdit() {
