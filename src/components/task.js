@@ -18,15 +18,18 @@ const getTaskTemplate = (task) => {
   const time = isDateShowing ? `${formatTime(dueDate)}` : ``;
   const repeatClass = Object.values(repeatingDays).some(Boolean) ? `card--repeat` : ``;
   const deadlineClass = isExpired ? `card--deadline` : ``;
+  const editButton = createButtonMarkup(`edit`);
+  const archiveButton = createButtonMarkup(`archive`, !task.isArchive);
+  const favoritesButton = createButtonMarkup(`favorites`, !task.isFavorite);
 
   return (
     `<article class="card card--${color} ${repeatClass} ${deadlineClass}">
       <div class="card__form">
         <div class="card__inner">
           <div class="card__control">
-          ${createButtonMarkup(`edit`)}
-          ${createButtonMarkup(`archive`, !task.isArchive)}
-          ${createButtonMarkup(`favorites`, !task.isFavorite)}
+          ${editButton}
+          ${archiveButton}
+          ${favoritesButton}
           </div>
 
           <div class="card__color-bar">
@@ -68,8 +71,18 @@ export default class Task extends AbstractComponent {
   }
 
   setEditButtonClickHandler(handler) {
-    const editButton = this.getElement().querySelector(`.card__btn--edit`);
-    editButton.addEventListener(`click`, handler);
+    this.getElement().querySelector(`.card__btn--edit`)
+      .addEventListener(`click`, handler);
+  }
+
+  setArchiveButtonClickHandler(handler) {
+    this.getElement().querySelector(`.card__btn--archive`)
+      .addEventListener(`click`, handler);
+  }
+
+  setFavoritesButtonClickHandler(handler) {
+    this.getElement().querySelector(`.card__btn--favorites`)
+      .addEventListener(`click`, handler);
   }
 }
 
