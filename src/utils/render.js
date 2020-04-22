@@ -1,3 +1,7 @@
+const RenderPosition = {
+  AFTERBEGIN: `afterbegin`,
+  BEFOREEND: `beforeend`
+};
 
 const createElement = (template) => {
   const divElement = document.createElement(`div`);
@@ -5,12 +9,12 @@ const createElement = (template) => {
   return divElement.firstChild;
 };
 
-const render = (container, component, place = `beforeend`) => {
-  if (place === `afterbegin`) {
+const render = (container, component, place = RenderPosition.BEFOREEND) => {
+  if (place === RenderPosition.AFTERBEGIN) {
     container.prepend(component.getElement());
     return;
   }
-  if (place === `beforeend`) {
+  if (place === RenderPosition.BEFOREEND) {
     container.append(component.getElement());
     return;
   }
@@ -33,4 +37,4 @@ const remove = (component) => {
   component.removeElement();
 };
 
-export {createElement, render, replace, remove};
+export {RenderPosition, createElement, render, replace, remove};
