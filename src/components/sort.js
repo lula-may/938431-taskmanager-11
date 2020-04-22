@@ -6,12 +6,21 @@ const SortType = {
   DATE_DOWN: `date-down`,
 };
 
+const sortNames = Object.values(SortType);
+const getSortString = (sortName) => {
+  const words = sortName.split(`-`);
+  words[0] = words[0].toUpperCase();
+  return words.join(` `);
+};
+
+const SortListString = sortNames.map((name) => {
+  return `<a href="#" class="board__filter" data-sort-type="${name}">SORT BY ${getSortString(name)}</a>`;
+})
+  .join(`\n`);
 const getSortingTemplate = () => {
   return (
     `<div class="board__filter-list">
-      <a href="#" class="board__filter" data-sort-type="${SortType.DEFAULT}">SORT BY DEFAULT</a>
-      <a href="#" class="board__filter" data-sort-type="${SortType.DATE_UP}">SORT BY DATE up</a>
-      <a href="#" class="board__filter" data-sort-type="${SortType.DATE_DOWN}">SORT BY DATE down</a>
+      ${SortListString}
     </div>`
   );
 };
