@@ -17,6 +17,7 @@ const SortListString = sortNames.map((name) => {
   return `<a href="#" class="board__filter" data-sort-type="${name}">SORT BY ${getSortString(name)}</a>`;
 })
   .join(`\n`);
+
 const getSortingTemplate = () => {
   return (
     `<div class="board__filter-list">

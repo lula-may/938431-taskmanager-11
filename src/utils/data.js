@@ -14,7 +14,7 @@ export const getSortedTasks = (tasks, sortType) => {
       noDueDateTasks = tasks.slice().filter((task) => !(task.dueDate));
       sortedTasks = [...noDueDateTasks, ...sortedTasks];
       break;
-    case SortType.DEFAULT:
+    default:
       sortedTasks = tasks.slice();
       break;
   }
