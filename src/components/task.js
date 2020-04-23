@@ -66,6 +66,10 @@ export default class Task extends AbstractComponent {
     this._task = task;
   }
 
+  get task() {
+    return this._task;
+  }
+
   getTemplate() {
     return getTaskTemplate(this._task);
   }
