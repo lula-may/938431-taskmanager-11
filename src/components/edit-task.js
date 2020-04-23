@@ -57,6 +57,8 @@ const getEditTaskTemplate = (task, options = {}) => {
   const deadlineClass = isExpired ? `card--deadline` : ``;
   const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, activeRepeatingDays);
   const colorsMarkup = createColorsMarkup(COLORS, color);
+  const isSaveButtonBlocked = (isDateShowing && isRepeatingTask) ||
+         (isRepeatingTask && !isRepeating(activeRepeatingDays));
 
   return (
     `<article class="card card--edit card--${color} ${repeatClass} ${deadlineClass}">
@@ -116,7 +118,7 @@ const getEditTaskTemplate = (task, options = {}) => {
           </div>
 
           <div class="card__status-btns">
-            <button class="card__save" type="submit">save</button>
+            <button class="card__save" type="submit" ${isSaveButtonBlocked ? `disabled` : ``}>save</button>
             <button class="card__delete" type="button">delete</button>
           </div>
         </div>
