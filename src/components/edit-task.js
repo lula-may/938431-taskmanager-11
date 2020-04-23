@@ -1,5 +1,5 @@
 import {formatTime} from "../utils/common.js";
-import {COLORS, DAYS, MONTH_NAMES} from "../const.js";
+import {COLORS, DAYS} from "../const.js";
 import AbstractSmartComponent from "./abstract-smart-component.js";
 
 const createRepeatingDaysMarkup = (days, repeatingDays) => {
@@ -47,12 +47,11 @@ const createColorsMarkup = (colors, currentColor) => {
 
 const getEditTaskTemplate = (task, options = {}) => {
   const {description, dueDate, repeatingDays, color} = task;
-  const {isDateShowing} = options;
+  const {isDateShowing, isRepeatingTask} = options;
   const isExpired = dueDate instanceof Date && dueDate < Date.now();
-  const isRepeating = Object.values(repeatingDays).includes(true);
-  const date = (isDateShowing && dueDate) ? `${dueDate.getDate()} ${MONTH_NAMES[dueDate.getMonth()]}` : ``;
+  const date = (isDateShowing && dueDate) ? `${dueDate.toLocaleString(`en-GB`, {day: `numeric`, month: `long`})}` : ``;
   const time = (isDateShowing && dueDate) ? `${formatTime(dueDate)}` : ``;
-  const repeatClass = isRepeating ? `card--repeat` : ``;
+  const repeatClass = isRepeatingTask ? `card--repeat` : ``;
   const deadlineClass = isExpired ? `card--deadline` : ``;
   const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, repeatingDays);
   const colorsMarkup = createColorsMarkup(COLORS, color);
@@ -96,9 +95,9 @@ const getEditTaskTemplate = (task, options = {}) => {
                 </fieldset>` : ``}
 
                 <button class="card__repeat-toggle" type="button">
-                  repeat:<span class="card__repeat-status">${isRepeating ? `YES` : `NO`}</span>
+                  repeat:<span class="card__repeat-status">${isRepeatingTask ? `YES` : `NO`}</span>
                 </button>
-                ${isRepeating ? `<fieldset class="card__repeat-days">
+                ${isRepeatingTask ? `<fieldset class="card__repeat-days">
                   <div class="card__repeat-days-inner">
                   ${repeatingDaysMarkup}
                   </div>
@@ -129,13 +128,15 @@ export default class EditTask extends AbstractSmartComponent {
     super();
     this._task = task;
     this._isDateShowing = !!task.dueDate;
+    this._isRepeatingTask = Object.values(task.repeatingDays).includes(true);
     this._submitHandler = null;
     this._subscribeOnEvents();
   }
 
   getTemplate() {
     return getEditTaskTemplate(this._task, {
-      isDateShowing: this._isDateShowing
+      isDateShowing: this._isDateShowing,
+      isRepeatingTask: this._isRepeatingTask,
     });
   }
 
@@ -152,10 +153,19 @@ export default class EditTask extends AbstractSmartComponent {
   }
 
   _subscribeOnEvents() {
-    const deadlineButton = this.getElement().querySelector(`.card__date-deadline-toggle`);
-    deadlineButton.addEventListener(`click`, () => {
-      this._isDateShowing = !this._isDateShowing;
-      this.rerender();
-    });
+    const element = this.getElement();
+
+    element.querySelector(`.card__date-deadline-toggle`)
+      .addEventListener(`click`, () => {
+        this._isDateShowing = !this._isDateShowing;
+        this.rerender();
+      });
+
+    element.querySelector(`.card__repeat-toggle`)
+      .addEventListener(`click`, () => {
+        this._isRepeatingTask = !this._isRepeatingTask;
+        this.rerender();
+      });
+
   }
 }
