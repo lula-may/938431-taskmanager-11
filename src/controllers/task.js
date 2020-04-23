@@ -32,9 +32,11 @@ export default class TaskController {
 
   render(task) {
     const oldTaskComponent = this._taskComponent;
-    const oldEditTaskComponent = this._editTaskComponent;
+    const oldEditTaskComponent = this._taskEditComponent;
 
     this._taskComponent = new TaskComponent(task);
+    this._taskEditComponent = new EditTaskComponent(task);
+
     this._taskComponent.setEditButtonClickHandler(() => {
       this._replaceTaskToEdit();
     });
@@ -45,17 +47,22 @@ export default class TaskController {
       this._onDataChange(task, Object.assign({}, task, {isFavorite: !task.isFavorite}));
     });
 
-    this._taskEditComponent = new EditTaskComponent(task);
     this._taskEditComponent.setEditFormSubmitHandler((evt) => {
       evt.preventDefault();
       this._replaceEditToTask();
     });
 
-    if (oldTaskComponent || oldEditTaskComponent) {
+    if (oldTaskComponent && oldEditTaskComponent) {
       replace(this._taskComponent, oldTaskComponent);
       replace(this._taskEditComponent, oldEditTaskComponent);
     } else {
       render(this._container, this._taskComponent);
+    }
+  }
+
+  rerender(oldTask, newTask) {
+    if (this._taskComponent.task === oldTask) {
+      this.render(newTask);
     }
   }
 }

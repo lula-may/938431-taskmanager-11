@@ -69,11 +69,7 @@ export default class BoardController {
     this._tasks = [].concat(this._tasks.slice(0, index), newData, this._tasks.slice(index + 1));
 
     // Оповещаем всех подписчиков, и вызываем метод render у того, у кого есть ссылка на oldData в компоненте
-    this._showedTaskControllers.forEach((taskController) => {
-      if (taskController._taskComponent._task === oldData) {
-        taskController.render(newData);
-      }
-    });
+    this._showedTaskControllers.forEach((taskController) => taskController.rerender(oldData, newData));
   }
 
 
