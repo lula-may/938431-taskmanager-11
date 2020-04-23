@@ -10,15 +10,15 @@ const SHOWING_TASKS_AMOUNT_ON_START = 8;
 const SHOWING_TASKS_AMOUNT_BY_BUTTON = 8;
 
 
-const renderTasks = (taskListElement, tasks) => {
+const renderTasks = (taskListElement, tasks, onDataChange) => {
   return tasks.map((task) => {
-    const taskController = new TaskController(taskListElement);
+    const taskController = new TaskController(taskListElement, onDataChange);
     taskController.render(task);
     return taskController;
   });
 
 };
-export default class Board {
+export default class BoardController {
   constructor(container) {
     this._tasks = [];
     this._showedTaskControllers = [];
@@ -29,6 +29,9 @@ export default class Board {
     this._sortComponent = new SortComponent();
     this._tasksComponent = new TasksComponent();
     this._loadMoreButtonComponent = new LoadMoreButtonComponent();
+
+    // Обработчик изменения задачи
+    this._onDataChange = this._onDataChange.bind(this);
     // Обработчик изменения типа сортировки
     this._onSortTypeChange = this._onSortTypeChange.bind(this);
     this._sortComponent.setSortTypeChangeHandler(this._onSortTypeChange);
@@ -47,7 +50,7 @@ export default class Board {
       const sortedTasks = getSortedTasks(this._tasks, this._sortComponent.getSortType())
         .slice(prevTasksCount, this._showingTasksCount);
 
-      const newTasks = renderTasks(taskListElement, sortedTasks);
+      const newTasks = renderTasks(taskListElement, sortedTasks, this._onDataChange);
       this._showedTaskControllers = this._showedTaskControllers.concat(newTasks);
 
       if (this._showingTasksCount >= this._tasks.length) {
@@ -56,12 +59,30 @@ export default class Board {
     });
   }
 
+  _onDataChange(oldData, newData) {
+    // Проверяем, что изменившаяся задача есть в списке задач
+    const index = this._tasks.findIndex((item) => item === oldData);
+    if (index === -1) {
+      return;
+    }
+    // Заменяем старый объект задачи на новый в массиве задач
+    this._tasks = [].concat(this._tasks.slice(0, index), newData, this._tasks.slice(index + 1));
+
+    // Оповещаем всех подписчиков, и вызываем метод render у того, у кого есть ссылка на oldData в компоненте
+    this._showedTaskControllers.forEach((taskController) => {
+      if (taskController._taskComponent._task === oldData) {
+        taskController.render(newData);
+      }
+    });
+  }
+
+
   _onSortTypeChange(sortType) {
     const taskListElement = this._tasksComponent.getElement();
     taskListElement.innerHTML = ``;
     this._showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
     const sortedTasks = getSortedTasks(this._tasks, sortType);
-    const newTasks = renderTasks(taskListElement, sortedTasks.slice(0, this._showingTasksCount));
+    const newTasks = renderTasks(taskListElement, sortedTasks.slice(0, this._showingTasksCount), this._onDataChange);
 
     this._showedTaskControllers = newTasks;
     this._renderLoadMoreButton();
@@ -81,7 +102,7 @@ export default class Board {
     render(container, this._tasksComponent);
 
     const taskListElement = this._tasksComponent.getElement();
-    const newTasks = renderTasks(taskListElement, this._tasks.slice(0, this._showingTasksCount));
+    const newTasks = renderTasks(taskListElement, this._tasks.slice(0, this._showingTasksCount), this._onDataChange);
 
     this._showedTaskControllers = this._showedTaskControllers.concat(newTasks);
     this._renderLoadMoreButton();

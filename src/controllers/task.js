@@ -3,9 +3,9 @@ import EditTaskComponent from "../components/edit-task.js";
 import {render, replace} from "../utils/render";
 
 export default class TaskController {
-  constructor(container) {
+  constructor(container, onDataChange) {
     this._container = container;
-
+    this._onDataChange = onDataChange;
     this._taskComponent = null;
     this._editTaskComponent = null;
 
@@ -31,14 +31,18 @@ export default class TaskController {
 
 
   render(task) {
+    const oldTaskComponent = this._taskComponent;
+    const oldEditTaskComponent = this._editTaskComponent;
 
     this._taskComponent = new TaskComponent(task);
     this._taskComponent.setEditButtonClickHandler(() => {
       this._replaceTaskToEdit();
     });
     this._taskComponent.setArchiveButtonClickHandler(() => {
+      this._onDataChange(task, Object.assign({}, task, {isArchive: !task.isArchive}));
     });
     this._taskComponent.setFavoritesButtonClickHandler(() => {
+      this._onDataChange(task, Object.assign({}, task, {isFavorite: !task.isFavorite}));
     });
 
     this._taskEditComponent = new EditTaskComponent(task);
@@ -47,6 +51,11 @@ export default class TaskController {
       this._replaceEditToTask();
     });
 
-    render(this._container, this._taskComponent);
+    if (oldTaskComponent || oldEditTaskComponent) {
+      replace(this._taskComponent, oldTaskComponent);
+      replace(this._taskEditComponent, oldEditTaskComponent);
+    } else {
+      render(this._container, this._taskComponent);
+    }
   }
 }
