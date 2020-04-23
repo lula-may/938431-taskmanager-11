@@ -1,6 +1,6 @@
 import {formatTime} from "../utils/common.js";
 import {COLORS, DAYS, MONTH_NAMES} from "../const.js";
-import AbstractComponent from "./abstract-component.js";
+import AbstractSmartComponent from "./abstract-smart-component.js";
 
 const createRepeatingDaysMarkup = (days, repeatingDays) => {
   return days
@@ -45,13 +45,13 @@ const createColorsMarkup = (colors, currentColor) => {
     .join(`\n`);
 };
 
-const getEditTaskTemplate = (task) => {
+const getEditTaskTemplate = (task, options = {}) => {
   const {description, dueDate, repeatingDays, color} = task;
+  const {isDateShowing} = options;
   const isExpired = dueDate instanceof Date && dueDate < Date.now();
-  const isDateShowing = !!dueDate;
   const isRepeating = Object.values(repeatingDays).includes(true);
-  const date = isDateShowing ? `${dueDate.getDate()} ${MONTH_NAMES[dueDate.getMonth()]}` : ``;
-  const time = isDateShowing ? `${formatTime(dueDate)}` : ``;
+  const date = (isDateShowing && dueDate) ? `${dueDate.getDate()} ${MONTH_NAMES[dueDate.getMonth()]}` : ``;
+  const time = (isDateShowing && dueDate) ? `${formatTime(dueDate)}` : ``;
   const repeatClass = isRepeating ? `card--repeat` : ``;
   const deadlineClass = isExpired ? `card--deadline` : ``;
   const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, repeatingDays);
@@ -124,18 +124,38 @@ const getEditTaskTemplate = (task) => {
   );
 };
 
-export default class EditTask extends AbstractComponent {
+export default class EditTask extends AbstractSmartComponent {
   constructor(task) {
     super();
     this._task = task;
+    this._isDateShowing = !!task.dueDate;
+    this._submitHandler = null;
+    this._subscribeOnEvents();
   }
 
   getTemplate() {
-    return getEditTaskTemplate(this._task);
+    return getEditTaskTemplate(this._task, {
+      isDateShowing: this._isDateShowing
+    });
   }
 
   setEditFormSubmitHandler(handler) {
     const editForm = this.getElement().querySelector(`.card__form`);
     editForm.addEventListener(`submit`, handler);
+    // Запоминаем обработчик для последующего восстановления
+    this._submitHandler = handler;
+  }
+
+  recoveryListeners() {
+    this.setEditFormSubmitHandler(this._submitHandler);
+    this._subscribeOnEvents();
+  }
+
+  _subscribeOnEvents() {
+    const deadlineButton = this.getElement().querySelector(`.card__date-deadline-toggle`);
+    deadlineButton.addEventListener(`click`, () => {
+      this._isDateShowing = !this._isDateShowing;
+      this.rerender();
+    });
   }
 }
