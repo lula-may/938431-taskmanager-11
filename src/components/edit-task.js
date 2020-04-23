@@ -45,15 +45,17 @@ const createColorsMarkup = (colors, currentColor) => {
     .join(`\n`);
 };
 
+const isRepeating = (repeatingDays) => Object.values(repeatingDays).includes(true);
+
 const getEditTaskTemplate = (task, options = {}) => {
-  const {description, dueDate, repeatingDays, color} = task;
-  const {isDateShowing, isRepeatingTask} = options;
+  const {description, dueDate, color} = task;
+  const {isDateShowing, isRepeatingTask, activeRepeatingDays} = options;
   const isExpired = dueDate instanceof Date && dueDate < Date.now();
   const date = (isDateShowing && dueDate) ? `${dueDate.toLocaleString(`en-GB`, {day: `numeric`, month: `long`})}` : ``;
   const time = (isDateShowing && dueDate) ? `${formatTime(dueDate)}` : ``;
   const repeatClass = isRepeatingTask ? `card--repeat` : ``;
   const deadlineClass = isExpired ? `card--deadline` : ``;
-  const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, repeatingDays);
+  const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, activeRepeatingDays);
   const colorsMarkup = createColorsMarkup(COLORS, color);
 
   return (
@@ -128,7 +130,8 @@ export default class EditTask extends AbstractSmartComponent {
     super();
     this._task = task;
     this._isDateShowing = !!task.dueDate;
-    this._isRepeatingTask = Object.values(task.repeatingDays).includes(true);
+    this._activeRepeatingDays = Object.assign({}, task.repeatingDays);
+    this._isRepeatingTask = isRepeating(task.repeatingDays);
     this._submitHandler = null;
     this._subscribeOnEvents();
   }
@@ -137,6 +140,7 @@ export default class EditTask extends AbstractSmartComponent {
     return getEditTaskTemplate(this._task, {
       isDateShowing: this._isDateShowing,
       isRepeatingTask: this._isRepeatingTask,
+      activeRepeatingDays: this._activeRepeatingDays
     });
   }
 
@@ -167,5 +171,12 @@ export default class EditTask extends AbstractSmartComponent {
         this.rerender();
       });
 
+    const repeatDaysFieldset = element.querySelector(`.card__repeat-days`);
+    if (repeatDaysFieldset) {
+      repeatDaysFieldset.addEventListener(`change`, (evt) => {
+        this._activeRepeatingDays[evt.target.value] = evt.target.checked;
+        this.rerender();
+      });
+    }
   }
 }
