@@ -36,7 +36,6 @@ export default class TaskController {
   _onEscKeydown(evt) {
     const isEscKey = evt.key === `Escape` || evt.key === `Esc`;
     if (isEscKey) {
-      this.reset();
       this._replaceEditToTask();
     }
   }
