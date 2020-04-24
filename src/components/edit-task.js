@@ -155,6 +155,15 @@ export default class EditTask extends AbstractSmartComponent {
     this._submitHandler = handler;
   }
 
+  reset() {
+    const task = this._task;
+    this._color = task.color;
+    this._isDateShowing = !!task.dueDate;
+    this._activeRepeatingDays = Object.assign({}, task.repeatingDays);
+    this._isRepeatingTask = isRepeating(task.repeatingDays);
+    this.rerender();
+  }
+
   recoveryListeners() {
     this.setEditFormSubmitHandler(this._submitHandler);
     this._subscribeOnEvents();
