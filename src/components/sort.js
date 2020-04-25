@@ -1,20 +1,13 @@
 import AbstractComponent from "./abstract-component.js";
 
 const SortType = {
-  DEFAULT: `default`,
-  DATE_UP: `date-up`,
-  DATE_DOWN: `date-down`,
+  DEFAULT: `DEFAULT`,
+  DATE_UP: `DATE up`,
+  DATE_DOWN: `DATE down`,
 };
 
-const sortNames = Object.values(SortType);
-const getSortString = (sortName) => {
-  const words = sortName.split(`-`);
-  words[0] = words[0].toUpperCase();
-  return words.join(` `);
-};
-
-const SortListString = sortNames.map((name) => {
-  return `<a href="#" class="board__filter" data-sort-type="${name}">SORT BY ${getSortString(name)}</a>`;
+const SortListString = Object.values(SortType).map((type) => {
+  return `<a href="#" class="board__filter" data-sort-type="${type}">SORT BY ${type}</a>`;
 })
   .join(`\n`);
 
