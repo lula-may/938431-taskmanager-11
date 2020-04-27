@@ -1,4 +1,4 @@
-import {formatTime} from "../utils/common.js";
+import {formatTime, formatDate} from "../utils/common.js";
 import {COLORS, DAYS} from "../const.js";
 import AbstractSmartComponent from "./abstract-smart-component.js";
 import flatpickr from "flatpickr";
@@ -54,7 +54,7 @@ const getEditTaskTemplate = (task, options = {}) => {
   const {description, dueDate} = task;
   const {color, isDateShowing, isRepeatingTask, activeRepeatingDays} = options;
   const isExpired = dueDate instanceof Date && dueDate < Date.now();
-  const date = (isDateShowing && dueDate) ? `${dueDate.toLocaleString(`en-GB`, {day: `numeric`, month: `long`})}` : ``;
+  const date = (isDateShowing && dueDate) ? `${formatDate(dueDate)}` : ``;
   const time = (isDateShowing && dueDate) ? `${formatTime(dueDate)}` : ``;
   const repeatClass = isRepeatingTask ? `card--repeat` : ``;
   const deadlineClass = isExpired ? `card--deadline` : ``;
