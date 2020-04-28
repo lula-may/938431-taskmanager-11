@@ -28,6 +28,7 @@ const generateRepeatingDays = () => Object.assign({}, defaultRepeatingDays, {"mo
 const generateTask = () => {
   const dueDate = Math.random() < 0.5 ? getRandomDate() : null;
   return {
+    id: String(new Date() + Math.random()),
     description: getRandomItem(taskDescriptions),
     dueDate,
     repeatingDays: generateRepeatingDays(),
