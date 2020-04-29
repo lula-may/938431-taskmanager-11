@@ -1,4 +1,4 @@
-export default class Task {
+export default class Tasks {
   constructor() {
     this._tasks = [];
     this._dataChangeHandlers = [];
