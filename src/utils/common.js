@@ -8,4 +8,16 @@ const formatDate = (date) => {
   return moment(date).format(`DD MMMM`);
 };
 
-export {formatTime, formatDate};
+const isRepeating = (repeatingDays) => Object.values(repeatingDays).includes(true);
+
+const isOverDue = (dueDate) => {
+  return dueDate && dueDate < Date.now();
+};
+
+const today = new Date();
+const isToday = (dueDate) => {
+  return dueDate && dueDate.getDate() === today;
+};
+
+export {formatTime, formatDate, isRepeating, isOverDue, isToday};
+
