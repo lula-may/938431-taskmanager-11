@@ -30,6 +30,7 @@ export default class BoardController {
     this._tasksComponent = new TasksComponent();
     this._loadMoreButtonComponent = new LoadMoreButtonComponent();
 
+    this._onLoadMoreButtonClick = this._onLoadMoreButtonClick.bind(this);
     // Обработчики изменения задачи
     this._onDataChange = this._onDataChange.bind(this);
     this._onViewChange = this._onViewChange.bind(this);
@@ -39,26 +40,28 @@ export default class BoardController {
     this._sortComponent.setSortTypeChangeHandler(this._onSortTypeChange);
   }
 
+  _onLoadMoreButtonClick() {
+    const prevTasksCount = this._showingTasksCount;
+    this._showingTasksCount += SHOWING_TASKS_AMOUNT_BY_BUTTON;
+    const taskListElement = this._tasksComponent.getElement();
+    const sortedTasks = getSortedTasks(this._tasks, this._sortComponent.getSortType())
+      .slice(prevTasksCount, this._showingTasksCount);
+
+    const newTasks = renderTasks(taskListElement, sortedTasks, this._onDataChange, this._onViewChange);
+    this._showedTaskControllers = this._showedTaskControllers.concat(newTasks);
+
+    if (this._showingTasksCount >= this._tasks.length) {
+      remove(this._loadMoreButtonComponent);
+    }
+  }
+
   _renderLoadMoreButton() {
     if (this._showingTasksCount >= this._tasks.length) {
       return;
     }
     render(this._container.getElement(), this._loadMoreButtonComponent);
 
-    this._loadMoreButtonComponent.setClickHandler(() => {
-      const prevTasksCount = this._showingTasksCount;
-      this._showingTasksCount += SHOWING_TASKS_AMOUNT_BY_BUTTON;
-      const taskListElement = this._tasksComponent.getElement();
-      const sortedTasks = getSortedTasks(this._tasks, this._sortComponent.getSortType())
-        .slice(prevTasksCount, this._showingTasksCount);
-
-      const newTasks = renderTasks(taskListElement, sortedTasks, this._onDataChange, this._onViewChange);
-      this._showedTaskControllers = this._showedTaskControllers.concat(newTasks);
-
-      if (this._showingTasksCount >= this._tasks.length) {
-        remove(this._loadMoreButtonComponent);
-      }
-    });
+    this._loadMoreButtonComponent.setClickHandler(this._onLoadMoreButtonClick);
   }
 
   _onDataChange(oldData, newData) {

@@ -1,6 +1,9 @@
-import {formatTime} from "../utils/common.js";
+import {formatTime, formatDate} from "../utils/common.js";
 import {COLORS, DAYS} from "../const.js";
 import AbstractSmartComponent from "./abstract-smart-component.js";
+import flatpickr from "flatpickr";
+
+import "flatpickr/dist/flatpickr.min.css";
 
 const createRepeatingDaysMarkup = (days, repeatingDays) => {
   return days
@@ -51,7 +54,7 @@ const getEditTaskTemplate = (task, options = {}) => {
   const {description, dueDate} = task;
   const {color, isDateShowing, isRepeatingTask, activeRepeatingDays} = options;
   const isExpired = dueDate instanceof Date && dueDate < Date.now();
-  const date = (isDateShowing && dueDate) ? `${dueDate.toLocaleString(`en-GB`, {day: `numeric`, month: `long`})}` : ``;
+  const date = (isDateShowing && dueDate) ? `${formatDate(dueDate)}` : ``;
   const time = (isDateShowing && dueDate) ? `${formatTime(dueDate)}` : ``;
   const repeatClass = isRepeatingTask ? `card--repeat` : ``;
   const deadlineClass = isExpired ? `card--deadline` : ``;
@@ -135,7 +138,10 @@ export default class EditTask extends AbstractSmartComponent {
     this._isDateShowing = !!task.dueDate;
     this._activeRepeatingDays = Object.assign({}, task.repeatingDays);
     this._isRepeatingTask = isRepeating(task.repeatingDays);
+    this._flatpickr = null;
     this._submitHandler = null;
+
+    this._applyFlatpickr();
     this._subscribeOnEvents();
   }
 
@@ -162,6 +168,30 @@ export default class EditTask extends AbstractSmartComponent {
     this._activeRepeatingDays = Object.assign({}, task.repeatingDays);
     this._isRepeatingTask = isRepeating(task.repeatingDays);
     this.rerender();
+  }
+
+  rerender() {
+    super.rerender();
+    this._applyFlatpickr();
+  }
+
+  _applyFlatpickr() {
+    // Если есть ранее созданный экземпляр flatpickr - удаляем его
+    if (this._flatpickr) {
+      this._flatpickr.destroy();
+      this._flatpickr = null;
+    }
+
+    // Создаем новый экземпляр flatpickr и вешаем его на поле Даты, если у задачи есть срок выполнения
+    if (this._isDateShowing) {
+      const dateElement = this.getElement().querySelector(`.card__date`);
+      this._flatpickr = flatpickr(dateElement, {
+        altInput: true,
+        allowInput: true,
+        defaultDate: this._task.dueDate || `today`,
+      });
+    }
+
   }
 
   recoveryListeners() {
