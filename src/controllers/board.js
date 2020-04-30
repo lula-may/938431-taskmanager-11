@@ -35,9 +35,12 @@ export default class BoardController {
     this._onDataChange = this._onDataChange.bind(this);
     this._onViewChange = this._onViewChange.bind(this);
 
-    // Обработчик изменения типа сортировки
+    // Обработчики изменения типа сортировки и фильтра
     this._onSortTypeChange = this._onSortTypeChange.bind(this);
+    this._onFilterTypeChange = this._onFilterTypeChange.bind(this);
+
     this._sortComponent.setSortTypeChangeHandler(this._onSortTypeChange);
+    this._tasksModel.setFilterChangeHandlers(this._onFilterTypeChange);
   }
 
   render() {
@@ -104,15 +107,20 @@ export default class BoardController {
   }
 
   _onSortTypeChange(sortType) {
-    debugger;
     const taskListElement = this._tasksComponent.getElement();
     taskListElement.innerHTML = ``;
     this._showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
     const sortedTasks = getSortedTasks(this._tasksModel.getTasks(), sortType);
-    // const newTasks = renderTasks(taskListElement, sortedTasks.slice(0, this._showingTasksCount), this._onDataChange, this._onViewChange);
-    // this._showedTaskControllers = newTasks;
     this._showedTaskControllers = [];
     this._renderTasks(sortedTasks.slice(0, this._showingTasksCount));
+    this._renderLoadMoreButton();
+  }
+
+  _onFilterTypeChange() {
+    const taskListElement = this._tasksComponent.getElement();
+    taskListElement.innerHTML = ``;
+    this._showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
+    this._renderTasks(this._tasksModel.getTasks().slice(0, this._showingTasksCount));
     this._renderLoadMoreButton();
   }
 }

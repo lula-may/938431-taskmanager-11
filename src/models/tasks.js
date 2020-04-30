@@ -37,6 +37,10 @@ export default class Tasks {
     this._dataChangeHandlers.push(handler);
   }
 
+  setFilterChangeHandlers(handler) {
+    this._filterChangeHandlers.push(handler);
+  }
+
   setFilter(filterType) {
     this._activeFilter = filterType;
     this._callHandlers(this._filterChangeHandlers);
