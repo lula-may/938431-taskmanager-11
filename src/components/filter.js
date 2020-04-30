@@ -5,6 +5,7 @@ const getFilterNameById = (id) => id.replace(FILTER_PREFIX, ``);
 
 const getfilterMarkup = (filter) => {
   const {name, count, checked} = filter;
+  const isEmpty = count === 0;
   return (
     `<input
       type="radio"
@@ -12,6 +13,7 @@ const getfilterMarkup = (filter) => {
       class="filter__input visually-hidden"
       name="filter"
       ${checked ? `checked` : ``}
+      ${isEmpty ? `disabled` : ``}
     />
     <label for="filter__${name}" class="filter__label">
       ${name} <span class="filter__${name}-count">${count}</span></label

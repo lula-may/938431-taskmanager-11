@@ -1,10 +1,5 @@
 import AbstractComponent from "./abstract-component.js";
-
-const SortType = {
-  DEFAULT: `DEFAULT`,
-  DATE_UP: `DATE up`,
-  DATE_DOWN: `DATE down`,
-};
+import {SortType} from "../const.js";
 
 const SortListString = Object.values(SortType).map((type) => {
   return `<a href="#" class="board__filter" data-sort-type="${type}">SORT BY ${type}</a>`;
@@ -50,8 +45,6 @@ export default class Sort extends AbstractComponent {
   }
 
   setSortType(sortType) {
-    this._sortType = sortType;
+    this._currentSortType = sortType;
   }
 }
-
-export {SortType};

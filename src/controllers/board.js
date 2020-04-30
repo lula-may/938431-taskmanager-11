@@ -5,6 +5,7 @@ import TaskController from "../controllers/task.js";
 import TasksComponent from "../components/tasks.js";
 import {render, remove} from "../utils/render.js";
 import {getSortedTasks} from "../utils/sort.js";
+import {SortType} from "../const.js";
 
 const SHOWING_TASKS_AMOUNT_ON_START = 8;
 const SHOWING_TASKS_AMOUNT_BY_BUTTON = 8;
@@ -113,11 +114,11 @@ export default class BoardController {
     });
   }
 
-  _onSortTypeChange(sortType) {
+  _onSortTypeChange(type) {
     this._removeTasks();
     this._showedTaskControllers = [];
     this._showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
-    const sortedTasks = getSortedTasks(this._tasksModel.getTasks(), sortType);
+    const sortedTasks = getSortedTasks(this._tasksModel.getTasks(), type);
     this._renderTasks(sortedTasks.slice(0, this._showingTasksCount));
     this._renderLoadMoreButton();
   }
@@ -125,6 +126,7 @@ export default class BoardController {
   _onFilterTypeChange() {
     debugger;
     this._showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
+    this._sortComponent.setSortType(SortType.DEFAULT);
     this._updateTasks(this._showingTasksCount);
   }
 }

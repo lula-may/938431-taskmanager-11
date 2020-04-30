@@ -32,4 +32,10 @@ const FilterType = {
   ARCHIVE: `archive`,
 };
 
-export {COLORS, DAYS, MONTH_NAMES, FilterType};
+const SortType = {
+  DEFAULT: `DEFAULT`,
+  DATE_UP: `DATE up`,
+  DATE_DOWN: `DATE down`,
+};
+
+export {COLORS, DAYS, MONTH_NAMES, FilterType, SortType};
