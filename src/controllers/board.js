@@ -149,7 +149,6 @@ export default class BoardController {
   }
 
   _onFilterTypeChange() {
-    debugger;
     this._showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
     this._sortComponent.setSortType(SortType.DEFAULT);
     this._updateTasks(this._showingTasksCount);
