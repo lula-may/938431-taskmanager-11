@@ -33,6 +33,22 @@ export default class Tasks {
     return true;
   }
 
+  removeTask(id) {
+    const index = this._tasks.findIndex((task) => task.id === id);
+    if (index === -1) {
+      return false;
+    }
+
+    this._tasks = [].concat(this._tasks.slice(0, index), this._tasks.slice(index + 1));
+    this._callHandlers(this._dataChangeHandlers);
+    return true;
+  }
+
+  addTask(task) {
+    this._tasks.unshift(task);
+    this._callHandlers(this._dataChangeHandlers);
+  }
+
   setDataChangeHandlers(handler) {
     this._dataChangeHandlers.push(handler);
   }
