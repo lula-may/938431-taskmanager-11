@@ -1,7 +1,7 @@
 import LoadMoreButtonComponent from "../components/load-more-button.js";
 import NoTaskComponent from "../components/no-task.js";
 import SortComponent from "../components/sort.js";
-import TaskController from "../controllers/task.js";
+import TaskController, {Mode as TaskControllerMode, EmptyTask} from "../controllers/task.js";
 import TasksComponent from "../components/tasks.js";
 import {render, remove} from "../utils/render.js";
 import {getSortedTasks} from "../utils/sort.js";
@@ -23,6 +23,7 @@ export default class BoardController {
   constructor(container, tasksModel) {
     this._tasksModel = tasksModel;
     this._showedTaskControllers = [];
+    this._newTaskController = null;
     this._container = container;
     this._showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
 
@@ -92,7 +93,7 @@ export default class BoardController {
   }
 
   _renderLoadMoreButton() {
-    if (this._showingTasksCount >= this._tasksModel.getTasks().length) {
+    if (this._showingTasksCount >= this._tasksModel.getTasks().length || !this._loadMoreButtonComponent.getElement()) {
       return;
     }
     render(this._container.getElement(), this._loadMoreButtonComponent);
@@ -101,6 +102,30 @@ export default class BoardController {
   }
 
   _onDataChange(oldData, newData) {
+    if (oldData === EmptyTask) {
+      this._creatingTask = null;
+      if (newData === null) {
+        this._newTaskController.destroy();
+        this._updateTasks(this._showingTasksCount);
+      } else {
+        this._tasksModel.addTask(newData);
+        this._newTaskController.render(newData, TaskControllerMode.DEFAULT);
+        // Если теперь карточек отображается больше, чем нужно - удаляем лишнюю
+        if (this._showingTasksCount % SHOWING_TASKS_AMOUNT_BY_BUTTON !== 0) {
+          const destroyedController = this._showedTaskControllers.pop();
+          destroyedController.destroy();
+        }
+
+        this._showedTaskControllers.unshift(this._newTaskController);
+        this._showingTasksCount = this._showedTaskControllers.length;
+        this._renderLoadMoreButton();
+      }
+    }
+    if (newData === null) {
+      this._tasksModel.removeTask(oldData.id);
+      this._updateTasks(this._showingTasksCount);
+      return;
+    }
     const isSuccess = this._tasksModel.updateTask(oldData.id, newData);
     if (isSuccess) {
       // Оповещаем всех подписчиков, и вызываем метод render у того, у кого есть ссылка на oldData в компоненте
