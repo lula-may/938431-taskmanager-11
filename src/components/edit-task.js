@@ -1,14 +1,33 @@
-import {formatTime, formatDate} from "../utils/common.js";
+import {formatTime, formatDate, isRepeating, isOverDue} from "../utils/common.js";
 import {COLORS, DAYS} from "../const.js";
 import AbstractSmartComponent from "./abstract-smart-component.js";
 import flatpickr from "flatpickr";
 
 import "flatpickr/dist/flatpickr.min.css";
 
+const defaultRepeatingDays = DAYS.reduce((acc, day) => {
+  acc[day] = false;
+  return acc;
+}, {});
+
+const parseFormData = (formData) => {
+  const repeatingDays = Object.assign({}, defaultRepeatingDays);
+  const date = formData.get(`date`);
+  return {
+    description: formData.get(`text`),
+    dueDate: date ? new Date(date) : null,
+    repeatingDays: formData.getAll(`repeat`).reduce((acc, day) => {
+      acc[day] = true;
+      return acc;
+    }, repeatingDays),
+    color: formData.get(`color`),
+  };
+};
+
 const createRepeatingDaysMarkup = (days, repeatingDays) => {
   return days
     .map((day, index) => {
-      const isRepeating = repeatingDays[day];
+      const isRepeatingDay = repeatingDays[day];
       return (
         `<input
           class="visually-hidden card__repeat-day-input"
@@ -16,7 +35,7 @@ const createRepeatingDaysMarkup = (days, repeatingDays) => {
           id="repeat-${day}-${index}"
           name="repeat"
           value="${day}"
-          ${isRepeating ? `checked` : ``}
+          ${isRepeatingDay ? `checked` : ``}
         />
         <label class="card__repeat-day" for="repeat-${day}-${index}">
           ${day}
@@ -48,12 +67,10 @@ const createColorsMarkup = (colors, currentColor) => {
     .join(`\n`);
 };
 
-const isRepeating = (repeatingDays) => Object.values(repeatingDays).includes(true);
-
 const getEditTaskTemplate = (task, options = {}) => {
   const {description, dueDate} = task;
   const {color, isDateShowing, isRepeatingTask, activeRepeatingDays} = options;
-  const isExpired = dueDate instanceof Date && dueDate < Date.now();
+  const isExpired = isOverDue(dueDate);
   const date = (isDateShowing && dueDate) ? `${formatDate(dueDate)}` : ``;
   const time = (isDateShowing && dueDate) ? `${formatTime(dueDate)}` : ``;
   const repeatClass = isRepeatingTask ? `card--repeat` : ``;
@@ -140,6 +157,7 @@ export default class EditTask extends AbstractSmartComponent {
     this._isRepeatingTask = isRepeating(task.repeatingDays);
     this._flatpickr = null;
     this._submitHandler = null;
+    this._deleteHandler = null;
 
     this._applyFlatpickr();
     this._subscribeOnEvents();
@@ -161,6 +179,18 @@ export default class EditTask extends AbstractSmartComponent {
     this._submitHandler = handler;
   }
 
+  getData() {
+    const editForm = this.getElement().querySelector(`.card__form`);
+    const formData = new FormData(editForm);
+    return parseFormData(formData);
+  }
+
+  setDeleteButtonClickHandler(handler) {
+    this.getElement().querySelector(`.card-delete`)
+      .addEventListener(`click`, handler);
+    this._deleteHandler = handler;
+  }
+
   reset() {
     const task = this._task;
     this._color = task.color;
@@ -168,6 +198,14 @@ export default class EditTask extends AbstractSmartComponent {
     this._activeRepeatingDays = Object.assign({}, task.repeatingDays);
     this._isRepeatingTask = isRepeating(task.repeatingDays);
     this.rerender();
+  }
+
+  remove() {
+    if (this._flatpickr) {
+      this._flatpickr.destroy();
+      this._flatpickr = null;
+    }
+    super.removeElement();
   }
 
   rerender() {
@@ -196,6 +234,7 @@ export default class EditTask extends AbstractSmartComponent {
 
   recoveryListeners() {
     this.setEditFormSubmitHandler(this._submitHandler);
+    this.setDeleteButtonClickHandler(this._deleteHandler);
     this._subscribeOnEvents();
   }
 

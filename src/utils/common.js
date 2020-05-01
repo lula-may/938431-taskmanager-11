@@ -11,7 +11,7 @@ const formatDate = (date) => {
 const isRepeating = (repeatingDays) => Object.values(repeatingDays).includes(true);
 
 const isOverDue = (dueDate) => {
-  return dueDate && dueDate < Date.now();
+  return dueDate instanceof Date && dueDate < Date.now();
 };
 
 const today = new Date();
