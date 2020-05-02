@@ -3,6 +3,7 @@ import {COLORS, DAYS} from "../const.js";
 import AbstractSmartComponent from "./abstract-smart-component.js";
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
+import {encode} from "he";
 
 const DESCRIPTION_LENGTH = {
   MIN: 1,
@@ -77,7 +78,8 @@ const createColorsMarkup = (colors, currentColor) => {
 };
 
 const getEditTaskTemplate = (options = {}) => {
-  const {color, dueDate, isDateShowing, isRepeatingTask, activeRepeatingDays, currentDescription: description} = options;
+  const {color, dueDate, isDateShowing, isRepeatingTask, activeRepeatingDays, currentDescription} = options;
+  const description = encode(currentDescription);
   const isExpired = isOverDue(dueDate);
   const date = (isDateShowing && dueDate) ? `${formatDate(dueDate)}` : ``;
   const time = (isDateShowing && dueDate) ? `${formatTime(dueDate)}` : ``;

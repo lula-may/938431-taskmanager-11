@@ -1,5 +1,6 @@
 import {formatTime, formatDate} from "../utils/common.js";
 import AbstractComponent from "./abstract-component.js";
+import {encode} from "he";
 
 const createButtonMarkup = (name, isActive = true) => {
   return (
@@ -10,7 +11,8 @@ const createButtonMarkup = (name, isActive = true) => {
 };
 
 const getTaskTemplate = (task) => {
-  const {description, dueDate, repeatingDays, color} = task;
+  const {description: notSanitizedDescription, dueDate, repeatingDays, color} = task;
+  const description = encode(notSanitizedDescription);
   const isExpired = dueDate instanceof Date && dueDate < Date.now();
   const isDateShowing = !!dueDate;
   const date = isDateShowing ? `${formatDate(dueDate)}` : ``;
