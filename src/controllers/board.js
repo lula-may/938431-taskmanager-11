@@ -14,7 +14,7 @@ const SHOWING_TASKS_AMOUNT_BY_BUTTON = 8;
 const renderTasks = (taskListElement, tasks, onDataChange, onViewChange) => {
   return tasks.map((task) => {
     const taskController = new TaskController(taskListElement, onDataChange, onViewChange);
-    taskController.render(task);
+    taskController.render(task, TaskControllerMode.DEFAULT);
     return taskController;
   });
 
@@ -23,6 +23,7 @@ export default class BoardController {
   constructor(container, tasksModel) {
     this._tasksModel = tasksModel;
     this._showedTaskControllers = [];
+    this._creatingTask = null;
     this._newTaskController = null;
     this._container = container;
     this._showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
@@ -68,6 +69,16 @@ export default class BoardController {
     this._showingTasksCount = this._showedTaskControllers.length;
   }
 
+  createTask() {
+    if (this._creatingTask) {
+      return;
+    }
+    const taskListElement = this._tasksComponent.getElement();
+    this._creatingTask = new TaskController(taskListElement, this._onDataChange, this._onViewChange);
+    this._creatingTask.render(EmptyTask, TaskControllerMode.ADDING);
+    this._newTaskController = this._creatingTask;
+  }
+
   _removeTasks() {
     this._showedTaskControllers.forEach((taskController) => taskController.destroy());
     this._showedTaskControllers = [];
@@ -102,21 +113,25 @@ export default class BoardController {
   }
 
   _onDataChange(oldData, newData) {
+    // Создание новой задачи
     if (oldData === EmptyTask) {
       this._creatingTask = null;
+      // Если новая задача не сохранена, удаляем контроллер новой задачи
       if (newData === null) {
         this._newTaskController.destroy();
         this._updateTasks(this._showingTasksCount);
       } else {
+        // Добавляем новую задачу в модель, заменяем форму редактирования на обычную карточку
         this._tasksModel.addTask(newData);
         this._newTaskController.render(newData, TaskControllerMode.DEFAULT);
+        this._showedTaskControllers.unshift(this._newTaskController);
+        this._showingTasksCount = this._showedTaskControllers.length;
+
         // Если теперь карточек отображается больше, чем нужно - удаляем лишнюю
         if (this._showingTasksCount % SHOWING_TASKS_AMOUNT_BY_BUTTON !== 0) {
           const destroyedController = this._showedTaskControllers.pop();
           destroyedController.destroy();
         }
-
-        this._showedTaskControllers.unshift(this._newTaskController);
         this._showingTasksCount = this._showedTaskControllers.length;
         this._renderLoadMoreButton();
       }

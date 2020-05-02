@@ -41,6 +41,13 @@ export default class Filter extends AbstractComponent {
     return getFilterTemplate(this._filters);
   }
 
+  updateActiveItem(itemId) {
+    const activeItem = this.getElement().querySelector(`#filter__${itemId}`);
+    if (activeItem) {
+      activeItem.checked = true;
+    }
+  }
+
   setFilterChangeHandler(handler) {
     this.getElement().addEventListener(`change`, (evt) => {
       const filterName = getFilterNameById(evt.target.id);

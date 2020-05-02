@@ -1,13 +1,32 @@
 import TaskComponent from "../components/task.js";
 import EditTaskComponent from "../components/edit-task.js";
-import {render, replace, remove} from "../utils/render";
+import {render, replace, remove, RenderPosition} from "../utils/render";
+import {COLORS} from "../const.js";
 
 export const Mode = {
   DEFAULT: `default`,
   EDIT: `edit`,
+  ADDING: `adding`,
 };
 
-export const EmptyTask = {};
+const DEFAULT_COLOR = COLORS[0];
+
+export const EmptyTask = {
+  description: ``,
+  dueDate: null,
+  repeatingDays: {
+    "mo": false,
+    "tu": false,
+    "we": false,
+    "th": false,
+    "fr": false,
+    "sa": false,
+    "su": false,
+  },
+  color: DEFAULT_COLOR,
+  isArchive: false,
+  isFavorite: false,
+};
 
 export default class TaskController {
   constructor(container, onDataChange, onViewChange) {
@@ -40,6 +59,9 @@ export default class TaskController {
   _onEscKeydown(evt) {
     const isEscKey = evt.key === `Escape` || evt.key === `Esc`;
     if (isEscKey) {
+      if (this._mode === Mode.ADDING) {
+        this._onDataChange(EmptyTask, null);
+      }
       this._replaceEditToTask();
     }
   }
@@ -69,14 +91,32 @@ export default class TaskController {
       this._onDataChange(task, newData);
     });
 
-    this._editTaskComponent.setDeleteButtonClickHandler(() => this._onDataChange(task, null));
+    this._editTaskComponent.setDeleteButtonClickHandler(() => {
+      this._onDataChange(task, null);
+    });
 
-    if (oldTaskComponent && oldEditTaskComponent) {
-      replace(this._taskComponent, oldTaskComponent);
-      replace(this._editTaskComponent, oldEditTaskComponent);
-      this._replaceEditToTask();
-    } else {
-      render(this._container, this._taskComponent);
+
+    switch (mode) {
+      case Mode.DEFAULT:
+        if (oldTaskComponent && oldEditTaskComponent) {
+          replace(this._taskComponent, oldTaskComponent);
+          replace(this._editTaskComponent, oldEditTaskComponent);
+          this._replaceEditToTask();
+        } else {
+          render(this._container, this._taskComponent);
+        }
+        break;
+      case Mode.ADDING:
+        // Если уже есть компоненты - удаляем их
+        // Вешаем обработчик Esc для закрытия
+        // Отрисовываем форму редактирования в начало списка
+        if (oldTaskComponent && oldEditTaskComponent) {
+          remove(oldTaskComponent);
+          remove(oldEditTaskComponent);
+        }
+        document.addEventListener(`keydown`, this._onEscKeydown);
+        render(this._container, this._editTaskComponent, RenderPosition.AFTERBEGIN);
+        break;
     }
   }
 

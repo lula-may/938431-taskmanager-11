@@ -29,6 +29,11 @@ export default class FilterController {
     }
   }
 
+  setActiveFilter(filterType) {
+    this._activeFilterType = filterType;
+    this._filterComponent.updateActiveItem(filterType);
+  }
+
   _getFilters(tasks) {
     return Object.values(FilterType).map((name) => {
       return {

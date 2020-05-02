@@ -2,8 +2,17 @@ import {formatTime, formatDate, isRepeating, isOverDue} from "../utils/common.js
 import {COLORS, DAYS} from "../const.js";
 import AbstractSmartComponent from "./abstract-smart-component.js";
 import flatpickr from "flatpickr";
-
 import "flatpickr/dist/flatpickr.min.css";
+
+const DESCRIPTION_LENGTH = {
+  MIN: 1,
+  MAX: 140,
+};
+
+const isAllowableDescriptionLength = (description) => {
+  const length = description.length;
+  return length >= DESCRIPTION_LENGTH.MIN && length <= DESCRIPTION_LENGTH.MAX;
+};
 
 const defaultRepeatingDays = DAYS.reduce((acc, day) => {
   acc[day] = false;
@@ -67,9 +76,8 @@ const createColorsMarkup = (colors, currentColor) => {
     .join(`\n`);
 };
 
-const getEditTaskTemplate = (task, options = {}) => {
-  const {description, dueDate} = task;
-  const {color, isDateShowing, isRepeatingTask, activeRepeatingDays} = options;
+const getEditTaskTemplate = (options = {}) => {
+  const {color, dueDate, isDateShowing, isRepeatingTask, activeRepeatingDays, currentDescription: description} = options;
   const isExpired = isOverDue(dueDate);
   const date = (isDateShowing && dueDate) ? `${formatDate(dueDate)}` : ``;
   const time = (isDateShowing && dueDate) ? `${formatTime(dueDate)}` : ``;
@@ -78,7 +86,8 @@ const getEditTaskTemplate = (task, options = {}) => {
   const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, activeRepeatingDays);
   const colorsMarkup = createColorsMarkup(COLORS, color);
   const isSaveButtonBlocked = (isDateShowing && isRepeatingTask) ||
-         (isRepeatingTask && !isRepeating(activeRepeatingDays));
+         (isRepeatingTask && !isRepeating(activeRepeatingDays)) ||
+         !isAllowableDescriptionLength(description);
 
   return (
     `<article class="card card--edit card--${color} ${repeatClass} ${deadlineClass}">
@@ -96,6 +105,8 @@ const getEditTaskTemplate = (task, options = {}) => {
                 class="card__text"
                 placeholder="Start typing your text here..."
                 name="text"
+                minlength="${DESCRIPTION_LENGTH.MIN}"
+                maxlength="${DESCRIPTION_LENGTH.MAX}"
               >${description}</textarea>
             </label>
           </div>
@@ -152,6 +163,8 @@ export default class EditTask extends AbstractSmartComponent {
     super();
     this._task = task;
     this._color = task.color;
+    this._currentDescription = task.description;
+    this._dueDate = task.dueDate;
     this._isDateShowing = !!task.dueDate;
     this._activeRepeatingDays = Object.assign({}, task.repeatingDays);
     this._isRepeatingTask = isRepeating(task.repeatingDays);
@@ -164,11 +177,13 @@ export default class EditTask extends AbstractSmartComponent {
   }
 
   getTemplate() {
-    return getEditTaskTemplate(this._task, {
+    return getEditTaskTemplate({
       color: this._color,
+      dueDate: this._dueDate,
       isDateShowing: this._isDateShowing,
       isRepeatingTask: this._isRepeatingTask,
-      activeRepeatingDays: this._activeRepeatingDays
+      activeRepeatingDays: this._activeRepeatingDays,
+      currentDescription: this._currentDescription,
     });
   }
 
@@ -186,7 +201,7 @@ export default class EditTask extends AbstractSmartComponent {
   }
 
   setDeleteButtonClickHandler(handler) {
-    this.getElement().querySelector(`.card-delete`)
+    this.getElement().querySelector(`.card__delete`)
       .addEventListener(`click`, handler);
     this._deleteHandler = handler;
   }
@@ -194,6 +209,8 @@ export default class EditTask extends AbstractSmartComponent {
   reset() {
     const task = this._task;
     this._color = task.color;
+    this._currentDescription = task.description;
+    this._dueDate = task.dueDate;
     this._isDateShowing = !!task.dueDate;
     this._activeRepeatingDays = Object.assign({}, task.repeatingDays);
     this._isRepeatingTask = isRepeating(task.repeatingDays);
@@ -226,7 +243,11 @@ export default class EditTask extends AbstractSmartComponent {
       this._flatpickr = flatpickr(dateElement, {
         altInput: true,
         allowInput: true,
-        defaultDate: this._task.dueDate || `today`,
+        defaultDate: this._dueDate || `today`,
+        onChange: (days) => {
+          this._dueDate = days[0];
+          this.rerender();
+        }
       });
     }
 
@@ -240,6 +261,13 @@ export default class EditTask extends AbstractSmartComponent {
 
   _subscribeOnEvents() {
     const element = this.getElement();
+
+    element.querySelector(`.card__text`)
+      .addEventListener(`input`, (evt) => {
+        this._currentDescription = evt.target.value;
+        const saveButton = element.querySelector(`.card__save`);
+        saveButton.disabled = !isAllowableDescriptionLength(this._currentDescription);
+      });
 
     element.querySelector(`.card__date-deadline-toggle`)
       .addEventListener(`click`, () => {
