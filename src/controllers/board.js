@@ -62,6 +62,14 @@ export default class BoardController {
     this._renderLoadMoreButton();
   }
 
+  show() {
+    this._container.show();
+  }
+
+  hide() {
+    this._container.hide();
+  }
+
   _renderTasks(tasks) {
     const taskListElement = this._tasksComponent.getElement();
     const newTasks = renderTasks(taskListElement, tasks, this._onDataChange, this._onViewChange);
@@ -136,6 +144,7 @@ export default class BoardController {
         this._renderLoadMoreButton();
       }
     }
+    // Удаление задачи
     if (newData === null) {
       this._tasksModel.removeTask(oldData.id);
       this._updateTasks(this._showingTasksCount);
@@ -164,6 +173,10 @@ export default class BoardController {
   }
 
   _onFilterTypeChange() {
+    this.resetSort();
+  }
+
+  resetSort() {
     this._showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
     this._sortComponent.setSortType(SortType.DEFAULT);
     this._updateTasks(this._showingTasksCount);
