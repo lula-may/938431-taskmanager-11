@@ -1,11 +1,11 @@
 import LoadMoreButtonComponent from "../components/load-more-button.js";
 import NoTaskComponent from "../components/no-task.js";
 import SortComponent from "../components/sort.js";
-import TaskController, {Mode as TaskControllerMode, EmptyTask} from "../controllers/task.js";
+import TaskController, {} from "../controllers/task.js";
 import TasksComponent from "../components/tasks.js";
 import {render, remove} from "../utils/render.js";
 import {getSortedTasks} from "../utils/sort.js";
-import {SortType} from "../const.js";
+import {SortType, BoardMode as Mode, TaskMode as TaskControllerMode} from "../const.js";
 
 const SHOWING_TASKS_AMOUNT_ON_START = 8;
 const SHOWING_TASKS_AMOUNT_BY_BUTTON = 8;
@@ -24,6 +24,7 @@ export default class BoardController {
     this._tasksModel = tasksModel;
     this._showedTaskControllers = [];
     this._creatingTask = null;
+    this._activeMode = Mode.TASKS;
     this._newTaskController = null;
     this._container = container;
     this._showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
@@ -73,9 +74,10 @@ export default class BoardController {
     if (this._creatingTask) {
       return;
     }
+    this._activeMode = Mode.ADDING;
     const taskListElement = this._tasksComponent.getElement();
     this._creatingTask = new TaskController(taskListElement, this._onDataChange, this._onViewChange);
-    this._creatingTask.render(EmptyTask, TaskControllerMode.ADDING);
+    this._creatingTask.render(null, TaskControllerMode.ADDING);
     this._newTaskController = this._creatingTask;
   }
 
@@ -114,7 +116,7 @@ export default class BoardController {
 
   _onDataChange(oldData, newData) {
     // Создание новой задачи
-    if (oldData === EmptyTask) {
+    if (this._activeMode === Mode.ADDING) {
       this._creatingTask = null;
       // Если новая задача не сохранена, удаляем контроллер новой задачи
       if (newData === null) {
@@ -134,8 +136,12 @@ export default class BoardController {
         }
         this._showingTasksCount = this._showedTaskControllers.length;
         this._renderLoadMoreButton();
+        this.mode = Mode.TASKS;
       }
+      this._activeMode = Mode.TASKS;
+      return;
     }
+
     if (newData === null) {
       this._tasksModel.removeTask(oldData.id);
       this._updateTasks(this._showingTasksCount);

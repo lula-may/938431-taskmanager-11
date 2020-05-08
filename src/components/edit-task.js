@@ -274,6 +274,9 @@ export default class EditTask extends AbstractSmartComponent {
     element.querySelector(`.card__date-deadline-toggle`)
       .addEventListener(`click`, () => {
         this._isDateShowing = !this._isDateShowing;
+        if (!this._isDateShowing) {
+          this._dueDate = null;
+        }
         this.rerender();
       });
 

@@ -1,17 +1,12 @@
 import TaskComponent from "../components/task.js";
 import EditTaskComponent from "../components/edit-task.js";
 import {render, replace, remove, RenderPosition} from "../utils/render";
-import {COLORS} from "../const.js";
+import {COLORS, TaskMode as Mode} from "../const.js";
 
-export const Mode = {
-  DEFAULT: `default`,
-  EDIT: `edit`,
-  ADDING: `adding`,
-};
 
 const DEFAULT_COLOR = COLORS[0];
 
-export const EmptyTask = {
+const EmptyTask = {
   description: ``,
   dueDate: null,
   repeatingDays: {
@@ -68,6 +63,10 @@ export default class TaskController {
 
 
   render(task, mode = Mode.DEFAULT) {
+    if (!task) {
+      task = Object.assign({}, EmptyTask);
+    }
+
     const oldTaskComponent = this._taskComponent;
     const oldEditTaskComponent = this._editTaskComponent;
 
