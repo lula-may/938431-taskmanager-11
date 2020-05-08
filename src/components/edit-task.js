@@ -10,17 +10,17 @@ const DESCRIPTION_LENGTH = {
   MAX: 140,
 };
 
-const isAllowableDescriptionLength = (description) => {
-  const length = description.length;
-  return length >= DESCRIPTION_LENGTH.MIN && length <= DESCRIPTION_LENGTH.MAX;
-};
+// const isAllowableDescriptionLength = (description) => {
+//   const length = description.length;
+//   return length >= DESCRIPTION_LENGTH.MIN && length <= DESCRIPTION_LENGTH.MAX;
+// };
 
 const defaultRepeatingDays = DAYS.reduce((acc, day) => {
   acc[day] = false;
   return acc;
 }, {});
 
-const parseFormData = (formData) => {
+const parseFormData = (formData, isValidDescription) => {
   const repeatingDays = Object.assign({}, defaultRepeatingDays);
   const date = formData.get(`date`);
   return {
@@ -31,6 +31,7 @@ const parseFormData = (formData) => {
       return acc;
     }, repeatingDays),
     color: formData.get(`color`),
+    isValidDescription,
   };
 };
 
@@ -88,8 +89,7 @@ const getEditTaskTemplate = (options = {}) => {
   const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, activeRepeatingDays);
   const colorsMarkup = createColorsMarkup(COLORS, color);
   const isSaveButtonBlocked = (isDateShowing && isRepeatingTask) ||
-         (isRepeatingTask && !isRepeating(activeRepeatingDays)) ||
-         !isAllowableDescriptionLength(description);
+         (isRepeatingTask && !isRepeating(activeRepeatingDays));
 
   return (
     `<article class="card card--edit card--${color} ${repeatClass} ${deadlineClass}">
@@ -263,13 +263,13 @@ export default class EditTask extends AbstractSmartComponent {
 
   _subscribeOnEvents() {
     const element = this.getElement();
+    const textElement = element.querySelector(`.card__text`);
+    textElement.addEventListener(`input`, (evt) => {
 
-    element.querySelector(`.card__text`)
-      .addEventListener(`input`, (evt) => {
-        this._currentDescription = evt.target.value;
-        const saveButton = element.querySelector(`.card__save`);
-        saveButton.disabled = !isAllowableDescriptionLength(this._currentDescription);
-      });
+      this._currentDescription = evt.target.value;
+      const saveButton = element.querySelector(`.card__save`);
+      saveButton.disabled = !textElement.checkValidity();
+    });
 
     element.querySelector(`.card__date-deadline-toggle`)
       .addEventListener(`click`, () => {
