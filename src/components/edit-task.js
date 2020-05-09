@@ -10,17 +10,12 @@ const DESCRIPTION_LENGTH = {
   MAX: 140,
 };
 
-// const isAllowableDescriptionLength = (description) => {
-//   const length = description.length;
-//   return length >= DESCRIPTION_LENGTH.MIN && length <= DESCRIPTION_LENGTH.MAX;
-// };
-
 const defaultRepeatingDays = DAYS.reduce((acc, day) => {
   acc[day] = false;
   return acc;
 }, {});
 
-const parseFormData = (formData, isValidDescription) => {
+const parseFormData = (formData) => {
   const repeatingDays = Object.assign({}, defaultRepeatingDays);
   const date = formData.get(`date`);
   return {
@@ -30,8 +25,7 @@ const parseFormData = (formData, isValidDescription) => {
       acc[day] = true;
       return acc;
     }, repeatingDays),
-    color: formData.get(`color`),
-    isValidDescription,
+    color: formData.get(`color`)
   };
 };
 
@@ -252,7 +246,6 @@ export default class EditTask extends AbstractSmartComponent {
         }
       });
     }
-
   }
 
   recoveryListeners() {

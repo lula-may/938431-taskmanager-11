@@ -54,9 +54,7 @@ export default class TaskController {
   _onEscKeydown(evt) {
     const isEscKey = evt.key === `Escape` || evt.key === `Esc`;
     if (isEscKey) {
-      if (this._mode === Mode.ADDING) {
-        this._onDataChange(EmptyTask, null);
-      }
+      this.removeCreatingTask();
       this._replaceEditToTask();
     }
   }
@@ -135,5 +133,12 @@ export default class TaskController {
     remove(this._taskComponent);
     remove(this._editTaskComponent);
     document.removeEventListener(`keydown`, this._onEscKeydown);
+  }
+
+  removeCreatingTask() {
+    if (this._mode !== Mode.ADDING) {
+      return;
+    }
+    this._onDataChange(EmptyTask, null);
   }
 }
