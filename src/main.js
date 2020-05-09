@@ -28,13 +28,23 @@ render(siteMainElement, boardComponent);
 const boardController = new BoardController(boardComponent, tasksModel);
 boardController.render(tasks);
 
-const statisticsComponent = new StatisticsComponent();
+const dateTo = new Date();
+const dateFrom = (() => {
+  const date = new Date(dateTo);
+  date.setDate(dateTo.getDate() - 7);
+  return date;
+})();
+const statisticsComponent = new StatisticsComponent({tasks: tasksModel, dateFrom, dateTo});
 render(siteMainElement, statisticsComponent);
+statisticsComponent.hide();
 
 mainMenuComponent.setOnChangeHandler((menuItem) => {
   mainMenuComponent.setActiveItem(menuItem);
   switch (menuItem) {
     case MenuItem.NEW_TASK:
+      boardController.show();
+      statisticsComponent.hide();
+      statisticsComponent.reset();
       tasksModel.setFilter(FilterType.ALL);
       filterController.setActiveFilter(FilterType.ALL);
       boardController.createTask();
@@ -42,6 +52,7 @@ mainMenuComponent.setOnChangeHandler((menuItem) => {
     case MenuItem.TASKS:
       boardController.show();
       statisticsComponent.hide();
+      statisticsComponent.reset();
       break;
     case MenuItem.STATISTICS:
       boardController.hide();

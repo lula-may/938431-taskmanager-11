@@ -1,4 +1,7 @@
 import AbstractSmartComponent from "./abstract-smart-component.js";
+import {isSameDay} from "../utils/common.js";
+import {FilterType} from "../const.js";
+import {getTasksByFilter} from "../utils/filter";
 import Chart from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import moment from "moment";
@@ -18,8 +21,11 @@ const isUniqItem = (item, index, items) => {
 
 const getTasksByDateRange = (tasks, dateFrom, dateTo) => {
   return tasks.filter((task) => {
-    const dueDate = task.dueDate;
-    return dueDate <= dateTo && dueDate >= dateFrom;
+    if (!task.dueDate) {
+      return false;
+    }
+    const dueDate = task.dueDate.getDate();
+    return dueDate <= dateTo.getDate() && dueDate >= dateFrom.getDate();
   });
 };
 
@@ -40,7 +46,8 @@ const generateDatesFromTo = (from, to) => {
   let date = new Date(from);
   while (date <= to) {
     dates.push(date);
-    date = new Date(date.getDate() + 1);
+    date = new Date(date);
+    date.setDate(date.getDate() + 1);
   }
   return dates;
 };
@@ -56,22 +63,152 @@ const renderColorsChart = (colorsCtx, tasks) => {
     plugins: [ChartDataLabels],
     type: `pie`,
     data: {
+      // Данные для расчета и построения диаграммы
+      // Подписи для элементов легенды
       labels: colors,
+      // Набор числовых значений и соответствующих им цветов на диаграмме
       datasets: [{
         data: values,
         backgroundColor: colors.map((color) => ColorToHex[color])
       }],
     },
-    options: options,
+    options: {
+      // Дополнительные настройки
+      plugins: {
+        // Значения элементов не отображаются на соответствующих секторах диаграммы
+        datalabels: {
+          display: false,
+        }
+      },
+      tooltips: {
+        // Настройки для всплывающих подсказок
+        callbacks: {
+          // Формирование текста подсказки
+          label: (tooltipItem, data) => {
+            const allData = data.datasets[tooltipItem.datasetIndex].data;
+            const tooltipData = allData[tooltipItem.index];
+            const total = allData.reduce((acc, it) => acc + parseFloat(it));
+            const tooltipPercentage = Math.round((tooltipData / total) * 100);
+            return `${tooltipData} TASKS - ${tooltipPercentage}%`;
+          }
+        },
+        // Стили для подсказки
+        displayColors: false,
+        backgroundColor: `#ffffff`,
+        bodyFontColor: `#000000`,
+        borderColor: `#000000`,
+        borderWidth: 1,
+        cornerRadius: 0,
+        xPadding: 15,
+        yPadding: 15,
+      },
+      // Стили для заголовка диаграммы
+      title: {
+        display: true,
+        text: `DONE BY: COLORS`,
+        fontSize: 16,
+        fontColor: `#000000`,
+      },
+      // Настройки для легенды диаграммы
+      legend: {
+        position: `left`,
+        // Стили для подписей
+        labels: {
+          boxWidth: 15,
+          padding: 25,
+          fontStyle: 500,
+          fontColor: `#000000`,
+          fontSize: 13
+        }
+      }
+    }
+  });
+};
+
+const renderDaysChart = (daysCtx, tasks, dateFrom, dateTo) => {
+  const days = generateDatesFromTo(dateFrom, dateTo);
+
+  const tasksAmountOnDay = days.map((date) => {
+    return tasks.filter((task) => {
+      return isSameDay(task.dueDate, date);
+    }).length;
+  });
+
+  const formattedDates = days.map((day) => moment(day).format(`DD MMM`));
+
+  return new Chart(daysCtx, {
+    plugins: [ChartDataLabels],
+    type: `line`,
+    data: {
+      labels: formattedDates,
+      datasets: [{
+        data: tasksAmountOnDay,
+        backgroundColor: `transparent`,
+        borderColor: `#000000`,
+        borderWidth: 1,
+        lineTension: 0,
+        pointRadius: 8,
+        pointHoverRadius: 8,
+        pointBackgroundColor: `#000000`,
+      }]
+    },
+    options: {
+      plugins: {
+        datalabels: {
+          font: {
+            size: 8
+          },
+          color: `#ffffff`
+        }
+      },
+      scales: {
+        // Настройки для оси Y
+        yAxes: [{
+          ticks: {
+            beginAtZero: true,
+            display: false
+          },
+          // Отображение сетки и границы: скрыто
+          gridLines: {
+            display: false,
+            drawBorder: false
+          }
+        }],
+        // Настройки оси Х
+        xAxes: [{
+          ticks: {
+            fontStyle: `bold`,
+            fontColor: `#000000`
+          },
+          gridLines: {
+            display: false,
+            drawBorder: false
+          }
+        }]
+      },
+      legend: {
+        // Легенда скрыта
+        display: false
+      },
+      layout: {
+        // Расположение графика
+        padding: {
+          top: 10,
+        }
+      },
+      tooltips: {
+        enabled: false,
+      }
+    }
   });
 };
 
 const getStatisticsTemplate = ({tasks, dateFrom, dateTo}) => {
   const placeholder = createPlaceholder(dateFrom, dateTo);
-  const tasksAmount = getTasksByDateRange(tasks, dateFrom, dateTo).length;
+  let tasksAmount = getTasksByDateRange(tasks, dateFrom, dateTo).length;
 
   return (
-    `<section class="statistic container visually-hidden">
+    `<section class="statistic container">
       <div class="statistic__line">
         <div class="statistic__period">
           <h2 class="statistic__period-title">Task Activity DIAGRAM</h2>
@@ -89,13 +226,13 @@ const getStatisticsTemplate = ({tasks, dateFrom, dateTo}) => {
             <span class="statistic__task-found">${tasksAmount}</span> tasks were fulfilled.
           </p>
         </div>
-        <div class="statistic__line-graphic visually-hidden">
+        <div class="statistic__line-graphic">
           <canvas class="statistic__days" width="550" height="150"></canvas>
         </div>
       </div>
 
       <div class="statistic__circle">
-        <div class="statistic__colors-wrap visually-hidden">
+        <div class="statistic__colors-wrap">
           <canvas class="statistic__colors" width="400" height="300"></canvas>
         </div>
       </div>
@@ -110,26 +247,30 @@ export default class Statistics extends AbstractSmartComponent {
     this._tasks = tasks;
     this._dateFrom = dateFrom;
     this._dateTo = dateTo;
+    this._defaultDateFrom = dateFrom;
+    this._defaultDateTo = dateTo;
+    this._archiveTasks = getTasksByFilter(tasks.getTasksAll(), FilterType.ARCHIVE);
 
     this._colorsChart = null;
     this._daysChart = null;
 
     this._applyFlatpicker(this.getElement().querySelector(`.statistic__period-input`));
+    this._renderCharts();
   }
 
   getTemplate() {
-    return getStatisticsTemplate({tasks: this._tasks, dateFrom: this._dateFrom, dateTo: this._dateTo});
+    return getStatisticsTemplate({tasks: this._archiveTasks, dateFrom: this._dateFrom, dateTo: this._dateTo});
   }
 
   show() {
+    this.rerender(this._dateFrom, this._dateTo);
     super.show();
-    this.rerender(this._tasks, this._dateFrom, this._dateTo);
   }
 
   recoveryListeners() {}
 
-  rerender(tasks, dateFrom, dateTo) {
-    this._tasks = tasks;
+  rerender(dateFrom, dateTo) {
+    this._archiveTasks = getTasksByFilter(this._tasks.getTasksAll(), FilterType.ARCHIVE);
     this._dateFrom = dateFrom;
     this._dateTo = dateTo;
 
@@ -137,9 +278,37 @@ export default class Statistics extends AbstractSmartComponent {
     this._renderCharts();
   }
 
-  _renderCharts() {}
+  reset() {
+    this._dateFrom = this._defaultDateFrom;
+    this._dateTo = this._defaultDateTo;
+  }
 
-  _resetCharts() {}
+  _renderCharts() {
+    const element = this.getElement();
+
+    this._applyFlatpicker(element.querySelector(`.statistic__period-input`));
+
+    const colorCtx = element.querySelector(`.statistic__colors`);
+    const daysCtx = element.querySelector(`.statistic__days`);
+
+    this._resetCharts();
+
+    renderDaysChart(daysCtx, this._archiveTasks, this._dateFrom, this._dateTo);
+    const tasksByPeriod = getTasksByDateRange(this._archiveTasks, this._dateFrom, this._dateTo);
+    renderColorsChart(colorCtx, tasksByPeriod);
+  }
+
+  _resetCharts() {
+    if (this._daysChart) {
+      this._daysChart.destroy();
+      this._daysChart = null;
+    }
+
+    if (this._colorsChart) {
+      this._colorsChart.destroy();
+      this._colorsChart = null;
+    }
+  }
 
   _applyFlatpicker(element) {
     if (this._flatpickr) {
@@ -151,10 +320,15 @@ export default class Statistics extends AbstractSmartComponent {
       altInput: true,
       allowInput: true,
       defaultDate: [this._dateFrom, this._dateTo],
+      dateFormat: `d M`,
+      altFormat: `d M`,
       mode: `range`,
+      locale: {
+        rangeSeparator: ` - `
+      },
       onChange: (dates) => {
         if (dates.length === 2) {
-          this.rerender(this._tasks, dates[0], dates[1]);
+          this.rerender(dates[0], dates[1]);
         }
       }
     });
