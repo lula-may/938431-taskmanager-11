@@ -33,6 +33,7 @@ export default class BoardController {
     this._newTaskController = null;
     this._container = container;
     this._showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
+    this._currentFilteredTasks = [];
 
     this._noTaskComponent = new NoTaskComponent();
     this._sortComponent = new SortComponent();
@@ -54,6 +55,7 @@ export default class BoardController {
 
   render() {
     const tasks = this._tasksModel.getTasks();
+    this._currentFilteredTasks = tasks;
     const container = this._container.getElement();
     const isAllTasksArchived = tasks.every((task) => task.isArchive);
 
@@ -94,24 +96,24 @@ export default class BoardController {
 
   _updateTasks(count) {
     this._removeTasks();
-    this._renderTasks(this._tasksModel.getTasks().slice(0, count));
+    this._currentFilteredTasks = this._tasksModel.getTasks();
+    this._renderTasks(this._currentFilteredTasks.slice(0, count));
     this._renderLoadMoreButton();
   }
 
   _onLoadMoreButtonClick() {
     const prevTasksCount = this._showingTasksCount;
     this._showingTasksCount += SHOWING_TASKS_AMOUNT_BY_BUTTON;
-    const sortedTasks = getSortedTasks(this._tasksModel.getTasks(), this._sortComponent.getSortType())
-      .slice(prevTasksCount, this._showingTasksCount);
+    const nextTasks = this._currentFilteredTasks.slice(prevTasksCount, this._showingTasksCount);
 
-    this._renderTasks(sortedTasks);
-    if (this._showingTasksCount >= this._tasksModel.getTasks().length) {
+    this._renderTasks(nextTasks);
+    if (this._showingTasksCount >= this._currentFilteredTasks.length) {
       remove(this._loadMoreButtonComponent);
     }
   }
 
   _renderLoadMoreButton() {
-    if (this._showingTasksCount >= this._tasksModel.getTasks().length || !this._loadMoreButtonComponent.getElement()) {
+    if (this._showingTasksCount >= this._currentFilteredTasks.length || !this._loadMoreButtonComponent.getElement()) {
       return;
     }
     render(this._container.getElement(), this._loadMoreButtonComponent);
@@ -169,8 +171,8 @@ export default class BoardController {
     this._removeTasks();
     this._showedTaskControllers = [];
     this._showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
-    const sortedTasks = getSortedTasks(this._tasksModel.getTasks(), type);
-    this._renderTasks(sortedTasks.slice(0, this._showingTasksCount));
+    this._currentFilteredTasks = getSortedTasks(this._tasksModel.getTasks(), type);
+    this._renderTasks(this._currentFilteredTasks.slice(0, this._showingTasksCount));
     this._renderLoadMoreButton();
   }
 
