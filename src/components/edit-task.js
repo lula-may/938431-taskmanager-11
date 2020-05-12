@@ -10,11 +10,6 @@ const DESCRIPTION_LENGTH = {
   MAX: 140,
 };
 
-// const isAllowableDescriptionLength = (description) => {
-//   const length = description.length;
-//   return length >= DESCRIPTION_LENGTH.MIN && length <= DESCRIPTION_LENGTH.MAX;
-// };
-
 const defaultRepeatingDays = DAYS.reduce((acc, day) => {
   acc[day] = false;
   return acc;
@@ -109,6 +104,7 @@ const getEditTaskTemplate = (options = {}) => {
                 name="text"
                 minlength="${DESCRIPTION_LENGTH.MIN}"
                 maxlength="${DESCRIPTION_LENGTH.MAX}"
+                required
               >${description}</textarea>
             </label>
           </div>
