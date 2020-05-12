@@ -5,15 +5,21 @@ import TaskController, {} from "../controllers/task.js";
 import TasksComponent from "../components/tasks.js";
 import {render, remove} from "../utils/render.js";
 import {getSortedTasks} from "../utils/sort.js";
-import {SortType, BoardMode as Mode, TaskMode as TaskControllerMode} from "../const.js";
+import {SortType} from "../const.js";
 
 const SHOWING_TASKS_AMOUNT_ON_START = 8;
 const SHOWING_TASKS_AMOUNT_BY_BUTTON = 8;
 
+const Mode = {
+  ADDING: `adding`,
+  TASKS: `tasks`,
+};
+
+
 const renderTasks = (taskListElement, tasks, onDataChange, onViewChange) => {
   return tasks.map((task) => {
     const taskController = new TaskController(taskListElement, onDataChange, onViewChange);
-    taskController.render(task, TaskControllerMode.DEFAULT);
+    taskController.render(task);
     return taskController;
   });
 
@@ -76,7 +82,7 @@ export default class BoardController {
     this._activeMode = Mode.ADDING;
     const taskListElement = this._tasksComponent.getElement();
     this._creatingTask = new TaskController(taskListElement, this._onDataChange, this._onViewChange);
-    this._creatingTask.render(null, TaskControllerMode.ADDING);
+    this._creatingTask.render(null);
     this._newTaskController = this._creatingTask;
   }
 
@@ -124,7 +130,7 @@ export default class BoardController {
       } else {
         // Добавляем новую задачу в модель, заменяем форму редактирования на обычную карточку
         this._tasksModel.addTask(newData);
-        this._newTaskController.render(newData, TaskControllerMode.DEFAULT);
+        this._newTaskController.render(newData);
         this._showedTaskControllers.unshift(this._newTaskController);
         this._showingTasksCount = this._showedTaskControllers.length;
 

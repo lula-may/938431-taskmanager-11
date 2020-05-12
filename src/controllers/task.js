@@ -1,8 +1,13 @@
 import TaskComponent from "../components/task.js";
 import EditTaskComponent from "../components/edit-task.js";
 import {render, replace, remove, RenderPosition} from "../utils/render";
-import {COLORS, TaskMode as Mode} from "../const.js";
+import {COLORS} from "../const.js";
 
+const Mode = {
+  DEFAULT: `default`,
+  EDIT: `edit`,
+  ADDING: `adding`,
+};
 
 const DEFAULT_COLOR = COLORS[0];
 
@@ -63,14 +68,16 @@ export default class TaskController {
 
 
   render(task, mode = Mode.DEFAULT) {
+    this._mode = mode;
+
     if (!task) {
+      this._mode = Mode.ADDING;
       task = Object.assign({}, EmptyTask);
     }
 
     const oldTaskComponent = this._taskComponent;
     const oldEditTaskComponent = this._editTaskComponent;
 
-    this._mode = mode;
     this._taskComponent = new TaskComponent(task);
     this._editTaskComponent = new EditTaskComponent(task);
 
@@ -95,7 +102,7 @@ export default class TaskController {
     });
 
 
-    switch (mode) {
+    switch (this._mode) {
       case Mode.DEFAULT:
         if (oldTaskComponent && oldEditTaskComponent) {
           replace(this._taskComponent, oldTaskComponent);

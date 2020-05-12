@@ -38,16 +38,5 @@ const SortType = {
   DATE_DOWN: `DATE down`,
 };
 
-const TaskMode = {
-  DEFAULT: `default`,
-  EDIT: `edit`,
-  ADDING: `adding`,
-};
 
-const BoardMode = {
-  ADDING: `adding`,
-  TASKS: `tasks`,
-};
-
-
-export {COLORS, DAYS, MONTH_NAMES, FilterType, SortType, TaskMode, BoardMode};
+export {COLORS, DAYS, MONTH_NAMES, FilterType, SortType};
