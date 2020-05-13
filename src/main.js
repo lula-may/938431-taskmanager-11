@@ -9,24 +9,6 @@ import {render} from "./utils/render.js";
 import {FilterType} from "./const.js";
 
 const TASK_AMOUNT = 25;
-const tasks = generateTasks(TASK_AMOUNT);
-const tasksModel = new TasksModel();
-tasksModel.setTasks(tasks);
-
-const siteMainElement = document.querySelector(`.main`);
-const siteHeaderElement = siteMainElement.querySelector(`.main__control`);
-
-const mainMenuComponent = new MainMenuComponent();
-render(siteHeaderElement, mainMenuComponent);
-
-const filterController = new FilterController(siteMainElement, tasksModel);
-filterController.render();
-
-const boardComponent = new BoardComponent();
-render(siteMainElement, boardComponent);
-
-const boardController = new BoardController(boardComponent, tasksModel);
-boardController.render(tasks);
 
 const dateTo = new Date();
 const dateFrom = (() => {
@@ -34,7 +16,25 @@ const dateFrom = (() => {
   date.setDate(dateTo.getDate() - 7);
   return date;
 })();
+
+const siteMainElement = document.querySelector(`.main`);
+const siteHeaderElement = siteMainElement.querySelector(`.main__control`);
+
+const tasks = generateTasks(TASK_AMOUNT);
+const tasksModel = new TasksModel();
+
+tasksModel.setTasks(tasks);
+
+const mainMenuComponent = new MainMenuComponent();
+const filterController = new FilterController(siteMainElement, tasksModel);
+const boardComponent = new BoardComponent();
+const boardController = new BoardController(boardComponent, tasksModel);
 const statisticsComponent = new StatisticsComponent({tasks: tasksModel, dateFrom, dateTo});
+
+render(siteHeaderElement, mainMenuComponent);
+filterController.render();
+render(siteMainElement, boardComponent);
+boardController.render(tasks);
 render(siteMainElement, statisticsComponent);
 statisticsComponent.hide();
 
