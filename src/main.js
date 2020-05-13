@@ -8,7 +8,7 @@ import {generateTasks} from "./mock/task.js";
 import {render} from "./utils/render.js";
 import {FilterType} from "./const.js";
 
-const TASK_AMOUNT = 20;
+const TASK_AMOUNT = 25;
 const tasks = generateTasks(TASK_AMOUNT);
 const tasksModel = new TasksModel();
 tasksModel.setTasks(tasks);

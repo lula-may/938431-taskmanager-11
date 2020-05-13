@@ -15,7 +15,7 @@ const ColorToHex = {
   pink: `#ff3cb9`
 };
 
-const isUniqItem = (item, index, items) => {
+const isUniqueItem = (item, index, items) => {
   return items.indexOf(item) === index;
 };
 
@@ -55,7 +55,7 @@ const generateDatesFromTo = (from, to) => {
 const renderColorsChart = (colorsCtx, tasks) => {
   const colors = tasks
     .map((task) => task.color)
-    .filter(isUniqItem);
+    .filter(isUniqueItem);
 
   const values = colors.map((color) => getTaksAmountByColor(tasks, color));
 
