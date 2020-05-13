@@ -1,10 +1,31 @@
 import TaskComponent from "../components/task.js";
 import EditTaskComponent from "../components/edit-task.js";
-import {render, replace} from "../utils/render";
+import {render, replace, remove, RenderPosition} from "../utils/render";
+import {COLORS} from "../const.js";
 
 const Mode = {
   DEFAULT: `default`,
   EDIT: `edit`,
+  ADDING: `adding`,
+};
+
+const DEFAULT_COLOR = COLORS[0];
+
+const EmptyTask = {
+  description: ``,
+  dueDate: null,
+  repeatingDays: {
+    "mo": false,
+    "tu": false,
+    "we": false,
+    "th": false,
+    "fr": false,
+    "sa": false,
+    "su": false,
+  },
+  color: DEFAULT_COLOR,
+  isArchive: false,
+  isFavorite: false,
 };
 
 export default class TaskController {
@@ -28,7 +49,9 @@ export default class TaskController {
 
   _replaceEditToTask() {
     this._editTaskComponent.reset();
-    replace(this._taskComponent, this._editTaskComponent);
+    if (document.contains(this._editTaskComponent.getElement())) {
+      replace(this._taskComponent, this._editTaskComponent);
+    }
     this._mode = Mode.DEFAULT;
     document.removeEventListener(`keydown`, this._onEscKeydown);
   }
@@ -36,12 +59,22 @@ export default class TaskController {
   _onEscKeydown(evt) {
     const isEscKey = evt.key === `Escape` || evt.key === `Esc`;
     if (isEscKey) {
+      if (this._mode === Mode.ADDING) {
+        this._onDataChange(EmptyTask, null);
+      }
       this._replaceEditToTask();
     }
   }
 
 
-  render(task) {
+  render(task, mode = Mode.DEFAULT) {
+    this._mode = mode;
+
+    if (!task) {
+      this._mode = Mode.ADDING;
+      task = Object.assign({}, EmptyTask);
+    }
+
     const oldTaskComponent = this._taskComponent;
     const oldEditTaskComponent = this._editTaskComponent;
 
@@ -60,14 +93,36 @@ export default class TaskController {
 
     this._editTaskComponent.setEditFormSubmitHandler((evt) => {
       evt.preventDefault();
-      this._replaceEditToTask();
+      const newData = this._editTaskComponent.getData();
+      this._onDataChange(task, newData);
     });
 
-    if (oldTaskComponent && oldEditTaskComponent) {
-      replace(this._taskComponent, oldTaskComponent);
-      replace(this._editTaskComponent, oldEditTaskComponent);
-    } else {
-      render(this._container, this._taskComponent);
+    this._editTaskComponent.setDeleteButtonClickHandler(() => {
+      this._onDataChange(task, null);
+    });
+
+
+    switch (this._mode) {
+      case Mode.DEFAULT:
+        if (oldTaskComponent && oldEditTaskComponent) {
+          replace(this._taskComponent, oldTaskComponent);
+          replace(this._editTaskComponent, oldEditTaskComponent);
+          this._replaceEditToTask();
+        } else {
+          render(this._container, this._taskComponent);
+        }
+        break;
+      case Mode.ADDING:
+        // Если уже есть компоненты - удаляем их
+        // Вешаем обработчик Esc для закрытия
+        // Отрисовываем форму редактирования в начало списка
+        if (oldTaskComponent && oldEditTaskComponent) {
+          remove(oldTaskComponent);
+          remove(oldEditTaskComponent);
+        }
+        document.addEventListener(`keydown`, this._onEscKeydown);
+        render(this._container, this._editTaskComponent, RenderPosition.AFTERBEGIN);
+        break;
     }
   }
 
@@ -81,5 +136,11 @@ export default class TaskController {
     if (this._mode !== Mode.DEFAULT) {
       this._replaceEditToTask();
     }
+  }
+
+  destroy() {
+    remove(this._taskComponent);
+    remove(this._editTaskComponent);
+    document.removeEventListener(`keydown`, this._onEscKeydown);
   }
 }

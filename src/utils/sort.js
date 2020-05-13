@@ -1,4 +1,4 @@
-import {SortType} from "../components/sort.js";
+import {SortType} from "../const.js";
 
 export const getSortedTasks = (tasks, sortType) => {
   let sortedTasks = [];

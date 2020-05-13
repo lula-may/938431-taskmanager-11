@@ -23,4 +23,20 @@ const MONTH_NAMES = [
   `December`,
 ];
 
-export {COLORS, DAYS, MONTH_NAMES};
+const FilterType = {
+  ALL: `all`,
+  OVERDUE: `overdue`,
+  TODAY: `today`,
+  FAVORITES: `favorites`,
+  REPEATING: `repeating`,
+  ARCHIVE: `archive`,
+};
+
+const SortType = {
+  DEFAULT: `DEFAULT`,
+  DATE_UP: `DATE up`,
+  DATE_DOWN: `DATE down`,
+};
+
+
+export {COLORS, DAYS, MONTH_NAMES, FilterType, SortType};
