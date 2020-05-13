@@ -19,5 +19,14 @@ const isToday = (dueDate) => {
   return dueDate && dueDate.getDate() === today;
 };
 
-export {formatTime, formatDate, isRepeating, isOverDue, isToday};
+const isSameDay = (dateA, dateB) => {
+  if (dateA && dateB) {
+    const a = dateA.getDate();
+    const b = dateB.getDate();
+    return a === b;
+  }
+  return false;
+};
+
+export {formatTime, formatDate, isRepeating, isOverDue, isToday, isSameDay};
 
