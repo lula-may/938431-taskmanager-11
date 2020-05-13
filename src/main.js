@@ -8,7 +8,7 @@ import TasksModel from "./models/tasks.js";
 import {render} from "./utils/render.js";
 import {FilterType} from "./const.js";
 
-const AUTHORIZATION = `Basic dk8Sdapo84E;d6bL2hWzm`;
+const AUTHORIZATION = `Basic dk8Sdapo84Ed6bL`;
 
 const dateTo = new Date();
 const dateFrom = (() => {
