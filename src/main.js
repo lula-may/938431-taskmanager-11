@@ -8,6 +8,8 @@ import TasksModel from "./models/tasks.js";
 import {render} from "./utils/render.js";
 import {FilterType} from "./const.js";
 
+const AUTHORIZATION = `Basic dk8Sdapo84E;d6bL2hWzm`;
+
 const dateTo = new Date();
 const dateFrom = (() => {
   const date = new Date(dateTo);
@@ -18,7 +20,7 @@ const dateFrom = (() => {
 const siteMainElement = document.querySelector(`.main`);
 const siteHeaderElement = siteMainElement.querySelector(`.main__control`);
 
-const api = new API();
+const api = new API(AUTHORIZATION);
 const tasksModel = new TasksModel();
 
 const mainMenuComponent = new MainMenuComponent();
