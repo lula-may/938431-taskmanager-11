@@ -1,7 +1,8 @@
 import TaskComponent from "../components/task.js";
+import TaskModel from "../models/task.js";
 import EditTaskComponent from "../components/edit-task.js";
 import {render, replace, remove, RenderPosition} from "../utils/render";
-import {COLORS} from "../const.js";
+import {COLORS, DAYS} from "../const.js";
 
 const Mode = {
   DEFAULT: `default`,
@@ -27,6 +28,29 @@ const EmptyTask = {
   isArchive: false,
   isFavorite: false,
 };
+
+const defaultRepeatingDays = DAYS.reduce((acc, day) => {
+  acc[day] = false;
+  return acc;
+}, {});
+
+const parseFormData = (formData) => {
+  const repeatingDays = Object.assign({}, defaultRepeatingDays);
+  const date = formData.get(`date`);
+
+  return new TaskModel({
+    "description": formData.get(`text`),
+    "due_date": date ? new Date(date) : null,
+    "repeating_days": formData.getAll(`repeat`).reduce((acc, day) => {
+      acc[day] = true;
+      return acc;
+    }, repeatingDays),
+    "color": formData.get(`color`),
+    "is_archived": false,
+    "is_favorite": false
+  });
+};
+
 
 export default class TaskController {
   constructor(container, onDataChange, onViewChange) {
@@ -83,15 +107,21 @@ export default class TaskController {
       this._replaceTaskToEdit();
     });
     this._taskComponent.setArchiveButtonClickHandler(() => {
-      this._onDataChange(task, Object.assign({}, task, {isArchive: !task.isArchive}));
+      const newTask = TaskModel.clone(task);
+      newTask.isArchive = !newTask.isArchive;
+      this._onDataChange(task, newTask);
     });
     this._taskComponent.setFavoritesButtonClickHandler(() => {
-      this._onDataChange(task, Object.assign({}, task, {isFavorite: !task.isFavorite}));
+      const newTask = TaskModel.clone(task);
+      newTask.isFavorite = !newTask.isFavorite;
+      this._onDataChange(task, newTask);
     });
 
     this._editTaskComponent.setEditFormSubmitHandler((evt) => {
       evt.preventDefault();
-      const newData = this._editTaskComponent.getData();
+
+      const formData = this._editTaskComponent.getData();
+      const newData = parseFormData(formData);
       this._onDataChange(task, newData);
     });
 

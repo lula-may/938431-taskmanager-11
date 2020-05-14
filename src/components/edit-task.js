@@ -10,25 +10,6 @@ const DESCRIPTION_LENGTH = {
   MAX: 140,
 };
 
-const defaultRepeatingDays = DAYS.reduce((acc, day) => {
-  acc[day] = false;
-  return acc;
-}, {});
-
-const parseFormData = (formData) => {
-  const repeatingDays = Object.assign({}, defaultRepeatingDays);
-  const date = formData.get(`date`);
-  return {
-    description: formData.get(`text`),
-    dueDate: date ? new Date(date) : null,
-    repeatingDays: formData.getAll(`repeat`).reduce((acc, day) => {
-      acc[day] = true;
-      return acc;
-    }, repeatingDays),
-    color: formData.get(`color`)
-  };
-};
-
 const createRepeatingDaysMarkup = (days, repeatingDays) => {
   return days
     .map((day, index) => {
@@ -193,8 +174,7 @@ export default class EditTask extends AbstractSmartComponent {
 
   getData() {
     const editForm = this.getElement().querySelector(`.card__form`);
-    const formData = new FormData(editForm);
-    return parseFormData(formData);
+    return new FormData(editForm);
   }
 
   setDeleteButtonClickHandler(handler) {
