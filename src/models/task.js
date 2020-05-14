@@ -9,11 +9,27 @@ export default class Task {
     this.isFavorite = data[`is_favorite`];
   }
 
+  toRAW() {
+    return {
+      "id": this.id,
+      "description": this.description,
+      "due_date": this.dueDate ? this.dueDate.toISOString() : null,
+      "repeating_days": this.repeatingDays,
+      "color": this.color,
+      "is_archived": this.isArchive,
+      "is_favorite": this.isFavorite
+    };
+  }
+
   static parseTask(data) {
     return new Task(data);
   }
 
   static parseTasks(tasks) {
     return tasks.map(Task.parseTask);
+  }
+
+  static clone(data) {
+    return new Task(data.toRAW());
   }
 }
