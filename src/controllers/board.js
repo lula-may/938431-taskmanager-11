@@ -25,13 +25,14 @@ const renderTasks = (taskListElement, tasks, onDataChange, onViewChange) => {
 
 };
 export default class BoardController {
-  constructor(container, tasksModel) {
+  constructor(container, tasksModel, api) {
+    this._container = container;
     this._tasksModel = tasksModel;
+    this._api = api;
     this._showedTaskControllers = [];
     this._creatingTask = null;
     this._activeMode = Mode.TASKS;
     this._newTaskController = null;
-    this._container = container;
     this._showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
     this._currentFilteredTasks = [];
 
@@ -162,11 +163,16 @@ export default class BoardController {
       this._updateTasks(this._showingTasksCount);
       return;
     }
-    const isSuccess = this._tasksModel.updateTask(oldData.id, newData);
-    if (isSuccess) {
-      // Оповещаем всех подписчиков, и вызываем метод render у того, у кого есть ссылка на oldData в компоненте
-      this._showedTaskControllers.forEach((taskController) => taskController.rerender(oldData, newData));
-    }
+
+    // Изменение задачи
+    this._api.updateTask(oldData.id, newData)
+      .then((taskModel) => {
+        const isSuccess = this._tasksModel.updateTask(oldData.id, newData);
+        if (isSuccess) {
+          // Оповещаем всех подписчиков, и вызываем метод render у того, у кого есть ссылка на oldData в компоненте
+          this._showedTaskControllers.forEach((taskController) => taskController.rerender(oldData, taskModel));
+        }
+      });
   }
 
   _onViewChange() {
