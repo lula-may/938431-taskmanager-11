@@ -166,8 +166,8 @@ export default class BoardController {
         .then(() => {
           this._tasksModel.removeTask(oldData.id);
           this._updateTasks(this._showingTasksCount);
-          return;
         });
+      return;
     }
 
     // Изменение задачи

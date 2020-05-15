@@ -123,10 +123,18 @@ export default class TaskController {
 
       const formData = this._editTaskComponent.getData();
       const newData = parseFormData(formData);
+      this._editTaskComponent.setExternalData({
+        saveButtonText: `Saving...`,
+        isSaveButtonBlocked: true
+      });
       this._onDataChange(task, newData);
     });
 
     this._editTaskComponent.setDeleteButtonClickHandler(() => {
+      this._editTaskComponent.setExternalData({
+        deleteButtonText: `Deleting...`,
+        isDeleteButtonBlocked: true
+      });
       this._onDataChange(task, null);
     });
 

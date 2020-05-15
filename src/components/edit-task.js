@@ -10,20 +10,27 @@ const DESCRIPTION_LENGTH = {
   MAX: 140,
 };
 
-const createRepeatingDaysMarkup = (days, repeatingDays) => {
+const DefaultData = {
+  saveButtonText: `Save`,
+  deleteButtonText: `Delete`,
+  isSaveButtonBlocked: false,
+  isDeleteButtonBlocked: false
+};
+
+const createRepeatingDaysMarkup = (days, repeatingDays, id) => {
   return days
-    .map((day, index) => {
+    .map((day) => {
       const isRepeatingDay = repeatingDays[day];
       return (
         `<input
           class="visually-hidden card__repeat-day-input"
           type="checkbox"
-          id="repeat-${day}-${index}"
+          id="repeat-${day}-${id}"
           name="repeat"
           value="${day}"
           ${isRepeatingDay ? `checked` : ``}
         />
-        <label class="card__repeat-day" for="repeat-${day}-${index}">
+        <label class="card__repeat-day" for="repeat-${day}-${id}">
           ${day}
         </label>`
       );
@@ -54,17 +61,20 @@ const createColorsMarkup = (colors, currentColor, id) => {
 };
 
 const getEditTaskTemplate = (options = {}) => {
-  const {id, color, dueDate, isDateShowing, isRepeatingTask, activeRepeatingDays, currentDescription} = options;
+  const {id, color, dueDate, isDateShowing, isRepeatingTask, activeRepeatingDays, currentDescription, externalData} = options;
   const description = encode(currentDescription);
   const isExpired = isOverDue(dueDate);
   const date = (isDateShowing && dueDate) ? `${formatDate(dueDate)}` : ``;
   const time = (isDateShowing && dueDate) ? `${formatTime(dueDate)}` : ``;
   const repeatClass = isRepeatingTask ? `card--repeat` : ``;
   const deadlineClass = isExpired ? `card--deadline` : ``;
-  const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, activeRepeatingDays);
+  const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, activeRepeatingDays, id);
   const colorsMarkup = createColorsMarkup(COLORS, color, id);
-  const isSaveButtonBlocked = (isDateShowing && isRepeatingTask) ||
-         (isRepeatingTask && !isRepeating(activeRepeatingDays));
+  const saveButtonText = externalData.saveButtonText;
+  const deleteButtonText = externalData.deleteButtonText;
+  const isFormDataInvalid = (isDateShowing && isRepeatingTask) || (isRepeatingTask && !isRepeating(activeRepeatingDays));
+  const isSaveButtonBlocked = externalData.isSaveButtonBlocked || isFormDataInvalid;
+  const isDeleteButtonBlocked = externalData.isDeleteButtonBlocked;
 
   return (
     `<article class="card card--edit card--${color} ${repeatClass} ${deadlineClass}">
@@ -127,8 +137,8 @@ const getEditTaskTemplate = (options = {}) => {
           </div>
 
           <div class="card__status-btns">
-            <button class="card__save" type="submit" ${isSaveButtonBlocked ? `disabled` : ``}>save</button>
-            <button class="card__delete" type="button">delete</button>
+            <button class="card__save" type="submit" ${isSaveButtonBlocked ? `disabled` : ``}>${saveButtonText}</button>
+            <button class="card__delete" type="button" ${isDeleteButtonBlocked ? `disabled` : ``}>${deleteButtonText}</button>
           </div>
         </div>
       </form>
@@ -147,6 +157,7 @@ export default class EditTask extends AbstractSmartComponent {
     this._isDateShowing = !!task.dueDate;
     this._activeRepeatingDays = Object.assign({}, task.repeatingDays);
     this._isRepeatingTask = isRepeating(task.repeatingDays);
+    this._externalData = DefaultData;
     this._flatpickr = null;
     this._submitHandler = null;
     this._deleteHandler = null;
@@ -164,6 +175,7 @@ export default class EditTask extends AbstractSmartComponent {
       isRepeatingTask: this._isRepeatingTask,
       activeRepeatingDays: this._activeRepeatingDays,
       currentDescription: this._currentDescription,
+      externalData: this._externalData
     });
   }
 
@@ -207,6 +219,11 @@ export default class EditTask extends AbstractSmartComponent {
   rerender() {
     super.rerender();
     this._applyFlatpickr();
+  }
+
+  setExternalData(data) {
+    this._externalData = Object.assign({}, DefaultData, data);
+    this.rerender();
   }
 
   _applyFlatpickr() {
