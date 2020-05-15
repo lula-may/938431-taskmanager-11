@@ -132,7 +132,7 @@ export default class BoardController {
 
   _onDataChange(oldData, newData) {
     // Создание новой задачи
-    if (this._activeMode === Mode.ADDING) {
+    if (this._activeMode === Mode.ADDING && !oldData) {
       this._creatingTask = null;
       // Если новая задача не сохранена, удаляем контроллер новой задачи
       if (newData === null) {

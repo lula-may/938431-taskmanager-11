@@ -31,20 +31,20 @@ const createRepeatingDaysMarkup = (days, repeatingDays) => {
     .join(`\n`);
 };
 
-const createColorsMarkup = (colors, currentColor) => {
+const createColorsMarkup = (colors, currentColor, id) => {
   return colors
-    .map((color, index) => {
+    .map((color) => {
       return (
         `<input
         type="radio"
-        id="color-${color}-${index}"
+        id="color-${color}--${id}"
         class="card__color-input card__color-input--${color} visually-hidden"
         name="color"
         value="${color}"
         ${color === currentColor ? `checked` : ``}
       />
       <label
-        for="color-${color}-${index}"
+        for="color-${color}--${id}"
         class="card__color card__color--${color}"
       >black
       </label>`
@@ -54,7 +54,7 @@ const createColorsMarkup = (colors, currentColor) => {
 };
 
 const getEditTaskTemplate = (options = {}) => {
-  const {color, dueDate, isDateShowing, isRepeatingTask, activeRepeatingDays, currentDescription} = options;
+  const {id, color, dueDate, isDateShowing, isRepeatingTask, activeRepeatingDays, currentDescription} = options;
   const description = encode(currentDescription);
   const isExpired = isOverDue(dueDate);
   const date = (isDateShowing && dueDate) ? `${formatDate(dueDate)}` : ``;
@@ -62,7 +62,7 @@ const getEditTaskTemplate = (options = {}) => {
   const repeatClass = isRepeatingTask ? `card--repeat` : ``;
   const deadlineClass = isExpired ? `card--deadline` : ``;
   const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, activeRepeatingDays);
-  const colorsMarkup = createColorsMarkup(COLORS, color);
+  const colorsMarkup = createColorsMarkup(COLORS, color, id);
   const isSaveButtonBlocked = (isDateShowing && isRepeatingTask) ||
          (isRepeatingTask && !isRepeating(activeRepeatingDays));
 
@@ -140,6 +140,7 @@ export default class EditTask extends AbstractSmartComponent {
   constructor(task) {
     super();
     this._task = task;
+    this._id = task.id ? task.id : `new`;
     this._color = task.color;
     this._currentDescription = task.description;
     this._dueDate = task.dueDate;
@@ -156,6 +157,7 @@ export default class EditTask extends AbstractSmartComponent {
 
   getTemplate() {
     return getEditTaskTemplate({
+      id: this._id,
       color: this._color,
       dueDate: this._dueDate,
       isDateShowing: this._isDateShowing,
@@ -270,6 +272,7 @@ export default class EditTask extends AbstractSmartComponent {
 
     const colorBar = element.querySelector(`.card__colors-wrap`);
     colorBar.addEventListener(`change`, (evt) => {
+      evt.stopPropagation();
       if (evt.target.tagName !== `INPUT`) {
         return;
       }
