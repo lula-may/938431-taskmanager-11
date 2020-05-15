@@ -30,7 +30,7 @@ export default class API {
     return this._load({
       url: `tasks/${id}`,
       method: Method.PUT,
-      body: JSON.stringify(data.toRAW()),
+      body: JSON.stringify(data.convertToRaw()),
       headers: new Headers({"Content-Type": `application/json`})
     })
     .then((response) => response.json())
@@ -41,7 +41,7 @@ export default class API {
     return this._load({
       url: `tasks`,
       method: Method.POST,
-      body: JSON.stringify(data.toRAW()),
+      body: JSON.stringify(data.convertToRaw()),
       headers: new Headers({"Content-Type": `application/json`})
     })
     .then((response) => response.json())

@@ -9,7 +9,7 @@ export default class Task {
     this.isFavorite = data[`is_favorite`];
   }
 
-  toRAW() {
+  convertToRaw() {
     return {
       "id": this.id,
       "description": this.description,
