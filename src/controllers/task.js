@@ -11,6 +11,7 @@ const Mode = {
 };
 
 const DEFAULT_COLOR = COLORS[0];
+const SHAKE_ANIMATION_TIMOUT = 600;
 
 const EmptyTask = {
   description: ``,
@@ -133,7 +134,8 @@ export default class TaskController {
     this._editTaskComponent.setDeleteButtonClickHandler(() => {
       this._editTaskComponent.setExternalData({
         deleteButtonText: `Deleting...`,
-        isDeleteButtonBlocked: true
+        isSaveButtonBlocked: true,
+        isDeleteButtonBlocked: true,
       });
       this._onDataChange(task, null);
     });
@@ -186,5 +188,24 @@ export default class TaskController {
       return;
     }
     this._onDataChange(EmptyTask, null);
+  }
+
+  shake() {
+    if (this._mode !== Mode.EDIT) {
+      return;
+    }
+    const editElement = this._editTaskComponent.getElement();
+    const innerElement = editElement.querySelector(`.card__inner`);
+    innerElement.style.border = `2px solid red`;
+    editElement.classList.add(`shake`);
+    setTimeout(() => {
+      editElement.classList.remove(`shake`);
+      this._editTaskComponent.setExternalData({
+        saveButtonText: `Save`,
+        deleteButtonText: `Delete`,
+        isSaveButtonBlocked: false,
+        isDeleteButtonBlocked: false
+      });
+    }, SHAKE_ANIMATION_TIMOUT);
   }
 }

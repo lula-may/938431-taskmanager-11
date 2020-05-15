@@ -155,6 +155,9 @@ export default class BoardController {
             }
             this._showingTasksCount = this._showedTaskControllers.length;
             this._renderLoadMoreButton();
+          })
+          .catch(() => {
+            this._newTaskController.shake();
           });
       }
       this._activeMode = Mode.TASKS;
@@ -166,6 +169,9 @@ export default class BoardController {
         .then(() => {
           this._tasksModel.removeTask(oldData.id);
           this._updateTasks(this._showingTasksCount);
+        })
+        .catch(() => {
+          this._showedTaskControllers.forEach((controller) => controller.shake());
         });
       return;
     }
@@ -178,6 +184,9 @@ export default class BoardController {
           // Оповещаем всех подписчиков, и вызываем метод render у того, у кого есть ссылка на oldData в компоненте
           this._showedTaskControllers.forEach((taskController) => taskController.rerender(oldData, taskModel));
         }
+      })
+      .catch(() => {
+        this._showedTaskControllers.forEach((controller) => controller.shake());
       });
   }
 
