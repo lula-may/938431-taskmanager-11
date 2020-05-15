@@ -162,9 +162,12 @@ export default class BoardController {
     }
     // Удаление задачи
     if (newData === null) {
-      this._tasksModel.removeTask(oldData.id);
-      this._updateTasks(this._showingTasksCount);
-      return;
+      this._api.deleteTask(oldData.id)
+        .then(() => {
+          this._tasksModel.removeTask(oldData.id);
+          this._updateTasks(this._showingTasksCount);
+          return;
+        });
     }
 
     // Изменение задачи
