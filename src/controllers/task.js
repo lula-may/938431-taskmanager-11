@@ -122,7 +122,6 @@ export default class TaskController {
 
       const formData = this._editTaskComponent.getData();
       const newData = parseFormData(formData);
-      debugger;
       this._onDataChange(task, newData);
     });
 
