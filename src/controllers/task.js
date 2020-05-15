@@ -106,6 +106,7 @@ export default class TaskController {
     this._taskComponent.setEditButtonClickHandler(() => {
       this._replaceTaskToEdit();
     });
+
     this._taskComponent.setArchiveButtonClickHandler(() => {
       const newTask = TaskModel.clone(task);
       newTask.isArchive = !newTask.isArchive;

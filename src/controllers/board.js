@@ -167,7 +167,7 @@ export default class BoardController {
     // Изменение задачи
     this._api.updateTask(oldData.id, newData)
       .then((taskModel) => {
-        const isSuccess = this._tasksModel.updateTask(oldData.id, newData);
+        const isSuccess = this._tasksModel.updateTask(oldData.id, taskModel);
         if (isSuccess) {
           // Оповещаем всех подписчиков, и вызываем метод render у того, у кого есть ссылка на oldData в компоненте
           this._showedTaskControllers.forEach((taskController) => taskController.rerender(oldData, taskModel));

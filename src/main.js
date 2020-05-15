@@ -8,6 +8,7 @@ import TasksModel from "./models/tasks.js";
 import {render} from "./utils/render.js";
 import {FilterType} from "./const.js";
 
+const END_POINT = `https://11.ecmascript.pages.academy/task-manager`;
 const AUTHORIZATION = `Basic dk8Sdapo84Ed6bL`;
 
 const dateTo = new Date();
@@ -20,7 +21,7 @@ const dateFrom = (() => {
 const siteMainElement = document.querySelector(`.main`);
 const siteHeaderElement = siteMainElement.querySelector(`.main__control`);
 
-const api = new API(AUTHORIZATION);
+const api = new API(AUTHORIZATION, END_POINT);
 const tasksModel = new TasksModel();
 
 const mainMenuComponent = new MainMenuComponent();
