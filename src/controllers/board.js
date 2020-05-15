@@ -132,27 +132,30 @@ export default class BoardController {
 
   _onDataChange(oldData, newData) {
     // Создание новой задачи
-    if (this._activeMode === Mode.ADDING && !oldData) {
+    if (this._activeMode === Mode.ADDING && !oldData.id) {
       this._creatingTask = null;
       // Если новая задача не сохранена, удаляем контроллер новой задачи
       if (newData === null) {
         this._newTaskController.destroy();
         this._updateTasks(this._showingTasksCount);
       } else {
+        // Отправляем новую задачу на сервер
         // Добавляем новую задачу в модель, заменяем форму редактирования на обычную карточку
-        this._tasksModel.addTask(newData);
-        this._newTaskController.render(newData);
-        this._showedTaskControllers.unshift(this._newTaskController);
-        this._showingTasksCount = this._showedTaskControllers.length;
+        this._api.createTask(newData)
+          .then((taskModel) => {
+            this._tasksModel.addTask(taskModel);
+            this._newTaskController.render(taskModel);
+            this._showedTaskControllers.unshift(this._newTaskController);
+            this._showingTasksCount = this._showedTaskControllers.length;
 
-        // Если теперь карточек отображается больше, чем нужно - удаляем лишнюю
-        if (this._showingTasksCount % SHOWING_TASKS_AMOUNT_BY_BUTTON !== 0) {
-          const destroyedController = this._showedTaskControllers.pop();
-          destroyedController.destroy();
-        }
-        this._showingTasksCount = this._showedTaskControllers.length;
-        this._renderLoadMoreButton();
-        this.mode = Mode.TASKS;
+            // Если теперь карточек отображается больше, чем нужно - удаляем лишнюю
+            if (this._showingTasksCount % SHOWING_TASKS_AMOUNT_BY_BUTTON !== 0) {
+              const destroyedController = this._showedTaskControllers.pop();
+              destroyedController.destroy();
+            }
+            this._showingTasksCount = this._showedTaskControllers.length;
+            this._renderLoadMoreButton();
+          });
       }
       this._activeMode = Mode.TASKS;
       return;
