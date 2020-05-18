@@ -13,11 +13,11 @@ const DESCRIPTION_LENGTH = {
 const DefaultData = {
   saveButtonText: `Save`,
   deleteButtonText: `Delete`,
-  isSaveButtonBlocked: false,
+  isFormBlocked: false,
   isDeleteButtonBlocked: false
 };
 
-const createRepeatingDaysMarkup = (days, repeatingDays, id) => {
+const createRepeatingDaysMarkup = (days, repeatingDays, id, isFormBlocked) => {
   return days
     .map((day) => {
       const isRepeatingDay = repeatingDays[day];
@@ -29,6 +29,7 @@ const createRepeatingDaysMarkup = (days, repeatingDays, id) => {
           name="repeat"
           value="${day}"
           ${isRepeatingDay ? `checked` : ``}
+          ${isFormBlocked ? `disabled` : ``}
         />
         <label class="card__repeat-day" for="repeat-${day}-${id}">
           ${day}
@@ -38,7 +39,7 @@ const createRepeatingDaysMarkup = (days, repeatingDays, id) => {
     .join(`\n`);
 };
 
-const createColorsMarkup = (colors, currentColor, id) => {
+const createColorsMarkup = (colors, currentColor, id, isFormBlocked) => {
   return colors
     .map((color) => {
       return (
@@ -49,6 +50,7 @@ const createColorsMarkup = (colors, currentColor, id) => {
         name="color"
         value="${color}"
         ${color === currentColor ? `checked` : ``}
+        ${isFormBlocked ? `disabled` : ``}
       />
       <label
         for="color-${color}--${id}"
@@ -68,13 +70,14 @@ const getEditTaskTemplate = (options = {}) => {
   const time = (isDateShowing && dueDate) ? `${formatTime(dueDate)}` : ``;
   const repeatClass = isRepeatingTask ? `card--repeat` : ``;
   const deadlineClass = isExpired ? `card--deadline` : ``;
-  const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, activeRepeatingDays, id);
-  const colorsMarkup = createColorsMarkup(COLORS, color, id);
+  const isFormBlocked = externalData.isFormBlocked;
+  const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, activeRepeatingDays, id, isFormBlocked);
+  const colorsMarkup = createColorsMarkup(COLORS, color, id, isFormBlocked);
   const saveButtonText = externalData.saveButtonText;
   const deleteButtonText = externalData.deleteButtonText;
   const isFormDataInvalid = (isDateShowing && isRepeatingTask) || (isRepeatingTask && !isRepeating(activeRepeatingDays));
-  const isSaveButtonBlocked = externalData.isSaveButtonBlocked || isFormDataInvalid;
-  const isDeleteButtonBlocked = externalData.isDeleteButtonBlocked;
+  const isSaveButtonBlocked = externalData.isFormBlocked || isFormDataInvalid;
+  const isDeleteButtonBlocked = externalData.isDeleteButtonBlocked || isFormBlocked;
 
   return (
     `<article class="card card--edit card--${color} ${repeatClass} ${deadlineClass}">
@@ -95,6 +98,7 @@ const getEditTaskTemplate = (options = {}) => {
                 minlength="${DESCRIPTION_LENGTH.MIN}"
                 maxlength="${DESCRIPTION_LENGTH.MAX}"
                 required
+                ${isFormBlocked ? `disabled` : ``}
               >${description}</textarea>
             </label>
           </div>
@@ -102,10 +106,10 @@ const getEditTaskTemplate = (options = {}) => {
           <div class="card__settings">
             <div class="card__details">
               <div class="card__dates">
-                <button class="card__date-deadline-toggle" type="button">
+                <button class="card__date-deadline-toggle" type="button" ${isFormBlocked ? `disabled` : ``}>
                   date: <span class="card__date-status">${isDateShowing ? `yes` : `no`}</span>
                 </button>
-                ${isDateShowing ? `<fieldset class="card__date-deadline">
+                ${isDateShowing ? `<fieldset class="card__date-deadline ${isFormBlocked ? `disabled` : ``}">
                   <label class="card__input-deadline-wrap">
                     <input
                       class="card__date"
@@ -117,10 +121,10 @@ const getEditTaskTemplate = (options = {}) => {
                   </label>
                 </fieldset>` : ``}
 
-                <button class="card__repeat-toggle" type="button">
+                <button class="card__repeat-toggle" type="button" ${isFormBlocked ? `disabled` : ``}>
                   repeat:<span class="card__repeat-status">${isRepeatingTask ? `YES` : `NO`}</span>
                 </button>
-                ${isRepeatingTask ? `<fieldset class="card__repeat-days">
+                ${isRepeatingTask ? `<fieldset class="card__repeat-days" ${isFormBlocked ? `disabled` : ``}>
                   <div class="card__repeat-days-inner">
                   ${repeatingDaysMarkup}
                   </div>

@@ -126,7 +126,7 @@ export default class TaskController {
       const newData = parseFormData(formData);
       this._editTaskComponent.setExternalData({
         saveButtonText: `Saving...`,
-        isSaveButtonBlocked: true
+        isFormBlocked: true
       });
       this._onDataChange(task, newData);
     });

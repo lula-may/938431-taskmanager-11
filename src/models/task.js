@@ -30,6 +30,6 @@ export default class Task {
   }
 
   static clone(data) {
-    return new Task(data.toRAW());
+    return new Task(data.convertToRaw());
   }
 }
