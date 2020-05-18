@@ -10,39 +10,28 @@ const DESCRIPTION_LENGTH = {
   MAX: 140,
 };
 
-const defaultRepeatingDays = DAYS.reduce((acc, day) => {
-  acc[day] = false;
-  return acc;
-}, {});
-
-const parseFormData = (formData) => {
-  const repeatingDays = Object.assign({}, defaultRepeatingDays);
-  const date = formData.get(`date`);
-  return {
-    description: formData.get(`text`),
-    dueDate: date ? new Date(date) : null,
-    repeatingDays: formData.getAll(`repeat`).reduce((acc, day) => {
-      acc[day] = true;
-      return acc;
-    }, repeatingDays),
-    color: formData.get(`color`)
-  };
+const DefaultData = {
+  saveButtonText: `Save`,
+  deleteButtonText: `Delete`,
+  isFormBlocked: false,
+  isDeleteButtonBlocked: false
 };
 
-const createRepeatingDaysMarkup = (days, repeatingDays) => {
+const createRepeatingDaysMarkup = (days, repeatingDays, id, isFormBlocked) => {
   return days
-    .map((day, index) => {
+    .map((day) => {
       const isRepeatingDay = repeatingDays[day];
       return (
         `<input
           class="visually-hidden card__repeat-day-input"
           type="checkbox"
-          id="repeat-${day}-${index}"
+          id="repeat-${day}-${id}"
           name="repeat"
           value="${day}"
           ${isRepeatingDay ? `checked` : ``}
+          ${isFormBlocked ? `disabled` : ``}
         />
-        <label class="card__repeat-day" for="repeat-${day}-${index}">
+        <label class="card__repeat-day" for="repeat-${day}-${id}">
           ${day}
         </label>`
       );
@@ -50,20 +39,21 @@ const createRepeatingDaysMarkup = (days, repeatingDays) => {
     .join(`\n`);
 };
 
-const createColorsMarkup = (colors, currentColor) => {
+const createColorsMarkup = (colors, currentColor, id, isFormBlocked) => {
   return colors
-    .map((color, index) => {
+    .map((color) => {
       return (
         `<input
         type="radio"
-        id="color-${color}-${index}"
+        id="color-${color}--${id}"
         class="card__color-input card__color-input--${color} visually-hidden"
         name="color"
         value="${color}"
         ${color === currentColor ? `checked` : ``}
+        ${isFormBlocked ? `disabled` : ``}
       />
       <label
-        for="color-${color}-${index}"
+        for="color-${color}--${id}"
         class="card__color card__color--${color}"
       >black
       </label>`
@@ -73,17 +63,21 @@ const createColorsMarkup = (colors, currentColor) => {
 };
 
 const getEditTaskTemplate = (options = {}) => {
-  const {color, dueDate, isDateShowing, isRepeatingTask, activeRepeatingDays, currentDescription} = options;
+  const {id, color, dueDate, isDateShowing, isRepeatingTask, activeRepeatingDays, currentDescription, externalData} = options;
   const description = encode(currentDescription);
   const isExpired = isOverDue(dueDate);
   const date = (isDateShowing && dueDate) ? `${formatDate(dueDate)}` : ``;
   const time = (isDateShowing && dueDate) ? `${formatTime(dueDate)}` : ``;
   const repeatClass = isRepeatingTask ? `card--repeat` : ``;
   const deadlineClass = isExpired ? `card--deadline` : ``;
-  const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, activeRepeatingDays);
-  const colorsMarkup = createColorsMarkup(COLORS, color);
-  const isSaveButtonBlocked = (isDateShowing && isRepeatingTask) ||
-         (isRepeatingTask && !isRepeating(activeRepeatingDays));
+  const isFormBlocked = externalData.isFormBlocked;
+  const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, activeRepeatingDays, id, isFormBlocked);
+  const colorsMarkup = createColorsMarkup(COLORS, color, id, isFormBlocked);
+  const saveButtonText = externalData.saveButtonText;
+  const deleteButtonText = externalData.deleteButtonText;
+  const isFormDataInvalid = (isDateShowing && isRepeatingTask) || (isRepeatingTask && !isRepeating(activeRepeatingDays));
+  const isSaveButtonBlocked = externalData.isFormBlocked || isFormDataInvalid;
+  const isDeleteButtonBlocked = externalData.isDeleteButtonBlocked || isFormBlocked;
 
   return (
     `<article class="card card--edit card--${color} ${repeatClass} ${deadlineClass}">
@@ -104,6 +98,7 @@ const getEditTaskTemplate = (options = {}) => {
                 minlength="${DESCRIPTION_LENGTH.MIN}"
                 maxlength="${DESCRIPTION_LENGTH.MAX}"
                 required
+                ${isFormBlocked ? `disabled` : ``}
               >${description}</textarea>
             </label>
           </div>
@@ -111,10 +106,10 @@ const getEditTaskTemplate = (options = {}) => {
           <div class="card__settings">
             <div class="card__details">
               <div class="card__dates">
-                <button class="card__date-deadline-toggle" type="button">
+                <button class="card__date-deadline-toggle" type="button" ${isFormBlocked ? `disabled` : ``}>
                   date: <span class="card__date-status">${isDateShowing ? `yes` : `no`}</span>
                 </button>
-                ${isDateShowing ? `<fieldset class="card__date-deadline">
+                ${isDateShowing ? `<fieldset class="card__date-deadline ${isFormBlocked ? `disabled` : ``}">
                   <label class="card__input-deadline-wrap">
                     <input
                       class="card__date"
@@ -126,10 +121,10 @@ const getEditTaskTemplate = (options = {}) => {
                   </label>
                 </fieldset>` : ``}
 
-                <button class="card__repeat-toggle" type="button">
+                <button class="card__repeat-toggle" type="button" ${isFormBlocked ? `disabled` : ``}>
                   repeat:<span class="card__repeat-status">${isRepeatingTask ? `YES` : `NO`}</span>
                 </button>
-                ${isRepeatingTask ? `<fieldset class="card__repeat-days">
+                ${isRepeatingTask ? `<fieldset class="card__repeat-days" ${isFormBlocked ? `disabled` : ``}>
                   <div class="card__repeat-days-inner">
                   ${repeatingDaysMarkup}
                   </div>
@@ -146,8 +141,8 @@ const getEditTaskTemplate = (options = {}) => {
           </div>
 
           <div class="card__status-btns">
-            <button class="card__save" type="submit" ${isSaveButtonBlocked ? `disabled` : ``}>save</button>
-            <button class="card__delete" type="button">delete</button>
+            <button class="card__save" type="submit" ${isSaveButtonBlocked ? `disabled` : ``}>${saveButtonText}</button>
+            <button class="card__delete" type="button" ${isDeleteButtonBlocked ? `disabled` : ``}>${deleteButtonText}</button>
           </div>
         </div>
       </form>
@@ -159,12 +154,14 @@ export default class EditTask extends AbstractSmartComponent {
   constructor(task) {
     super();
     this._task = task;
+    this._id = task.id ? task.id : `new`;
     this._color = task.color;
     this._currentDescription = task.description;
     this._dueDate = task.dueDate;
     this._isDateShowing = !!task.dueDate;
     this._activeRepeatingDays = Object.assign({}, task.repeatingDays);
     this._isRepeatingTask = isRepeating(task.repeatingDays);
+    this._externalData = DefaultData;
     this._flatpickr = null;
     this._submitHandler = null;
     this._deleteHandler = null;
@@ -175,12 +172,14 @@ export default class EditTask extends AbstractSmartComponent {
 
   getTemplate() {
     return getEditTaskTemplate({
+      id: this._id,
       color: this._color,
       dueDate: this._dueDate,
       isDateShowing: this._isDateShowing,
       isRepeatingTask: this._isRepeatingTask,
       activeRepeatingDays: this._activeRepeatingDays,
       currentDescription: this._currentDescription,
+      externalData: this._externalData
     });
   }
 
@@ -193,8 +192,7 @@ export default class EditTask extends AbstractSmartComponent {
 
   getData() {
     const editForm = this.getElement().querySelector(`.card__form`);
-    const formData = new FormData(editForm);
-    return parseFormData(formData);
+    return new FormData(editForm);
   }
 
   setDeleteButtonClickHandler(handler) {
@@ -225,6 +223,11 @@ export default class EditTask extends AbstractSmartComponent {
   rerender() {
     super.rerender();
     this._applyFlatpickr();
+  }
+
+  setExternalData(data) {
+    this._externalData = Object.assign({}, DefaultData, data);
+    this.rerender();
   }
 
   _applyFlatpickr() {
@@ -290,6 +293,7 @@ export default class EditTask extends AbstractSmartComponent {
 
     const colorBar = element.querySelector(`.card__colors-wrap`);
     colorBar.addEventListener(`change`, (evt) => {
+      evt.stopPropagation();
       if (evt.target.tagName !== `INPUT`) {
         return;
       }

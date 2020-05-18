@@ -25,13 +25,14 @@ const renderTasks = (taskListElement, tasks, onDataChange, onViewChange) => {
 
 };
 export default class BoardController {
-  constructor(container, tasksModel) {
+  constructor(container, tasksModel, api) {
+    this._container = container;
     this._tasksModel = tasksModel;
+    this._api = api;
     this._showedTaskControllers = [];
     this._creatingTask = null;
     this._activeMode = Mode.TASKS;
     this._newTaskController = null;
-    this._container = container;
     this._showingTasksCount = SHOWING_TASKS_AMOUNT_ON_START;
     this._currentFilteredTasks = [];
 
@@ -131,42 +132,62 @@ export default class BoardController {
 
   _onDataChange(oldData, newData) {
     // Создание новой задачи
-    if (this._activeMode === Mode.ADDING) {
+    if (this._activeMode === Mode.ADDING && !oldData.id) {
       this._creatingTask = null;
       // Если новая задача не сохранена, удаляем контроллер новой задачи
       if (newData === null) {
         this._newTaskController.destroy();
         this._updateTasks(this._showingTasksCount);
       } else {
+        // Отправляем новую задачу на сервер
         // Добавляем новую задачу в модель, заменяем форму редактирования на обычную карточку
-        this._tasksModel.addTask(newData);
-        this._newTaskController.render(newData);
-        this._showedTaskControllers.unshift(this._newTaskController);
-        this._showingTasksCount = this._showedTaskControllers.length;
+        this._api.createTask(newData)
+          .then((taskModel) => {
+            this._tasksModel.addTask(taskModel);
+            this._newTaskController.render(taskModel);
+            this._showedTaskControllers.unshift(this._newTaskController);
+            this._showingTasksCount = this._showedTaskControllers.length;
 
-        // Если теперь карточек отображается больше, чем нужно - удаляем лишнюю
-        if (this._showingTasksCount % SHOWING_TASKS_AMOUNT_BY_BUTTON !== 0) {
-          const destroyedController = this._showedTaskControllers.pop();
-          destroyedController.destroy();
-        }
-        this._showingTasksCount = this._showedTaskControllers.length;
-        this._renderLoadMoreButton();
-        this.mode = Mode.TASKS;
+            // Если теперь карточек отображается больше, чем нужно - удаляем лишнюю
+            if (this._showingTasksCount % SHOWING_TASKS_AMOUNT_BY_BUTTON !== 0) {
+              const destroyedController = this._showedTaskControllers.pop();
+              destroyedController.destroy();
+            }
+            this._showingTasksCount = this._showedTaskControllers.length;
+            this._renderLoadMoreButton();
+          })
+          .catch(() => {
+            this._newTaskController.shake();
+          });
       }
       this._activeMode = Mode.TASKS;
       return;
     }
     // Удаление задачи
     if (newData === null) {
-      this._tasksModel.removeTask(oldData.id);
-      this._updateTasks(this._showingTasksCount);
+      this._api.deleteTask(oldData.id)
+        .then(() => {
+          this._tasksModel.removeTask(oldData.id);
+          this._updateTasks(this._showingTasksCount);
+        })
+        .catch(() => {
+          this._showedTaskControllers.forEach((controller) => controller.shake());
+        });
       return;
     }
-    const isSuccess = this._tasksModel.updateTask(oldData.id, newData);
-    if (isSuccess) {
-      // Оповещаем всех подписчиков, и вызываем метод render у того, у кого есть ссылка на oldData в компоненте
-      this._showedTaskControllers.forEach((taskController) => taskController.rerender(oldData, newData));
-    }
+
+    // Изменение задачи
+    this._api.updateTask(oldData.id, newData)
+      .then((taskModel) => {
+        const isSuccess = this._tasksModel.updateTask(oldData.id, taskModel);
+        if (isSuccess) {
+          // Оповещаем всех подписчиков, и вызываем метод render у того, у кого есть ссылка на oldData в компоненте
+          this._showedTaskControllers.forEach((taskController) => taskController.rerender(oldData, taskModel));
+        }
+      })
+      .catch(() => {
+        this._showedTaskControllers.forEach((controller) => controller.shake());
+      });
   }
 
   _onViewChange() {
