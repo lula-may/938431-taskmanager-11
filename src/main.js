@@ -65,3 +65,11 @@ api.getTasks()
     tasksModel.setTasks(tasks);
     boardController.render();
   });
+
+window.addEventListener(`load`, () => {
+  navigator.serviceWorker.register(`./sw.js`)
+  .then(() => {})
+  .catch((err) => {
+    throw err;
+  });
+});
