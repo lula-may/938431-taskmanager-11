@@ -3,6 +3,7 @@ import BoardComponent from "./components/board.js";
 import BoardController from "./controllers/board.js";
 import FilterController from "./controllers/filter.js";
 import MainMenuComponent, {MenuItem} from "./components/main-menu.js";
+import Provider from "./api/provider.js";
 import StatisticsComponent from "./components/statistics.js";
 import TasksModel from "./models/tasks.js";
 import {render} from "./utils/render.js";
@@ -22,12 +23,13 @@ const siteMainElement = document.querySelector(`.main`);
 const siteHeaderElement = siteMainElement.querySelector(`.main__control`);
 
 const api = new API(AUTHORIZATION, END_POINT);
+const apiWithProvider = new Provider(api);
 const tasksModel = new TasksModel();
 
 const mainMenuComponent = new MainMenuComponent();
 const filterController = new FilterController(siteMainElement, tasksModel);
 const boardComponent = new BoardComponent();
-const boardController = new BoardController(boardComponent, tasksModel, api);
+const boardController = new BoardController(boardComponent, tasksModel, apiWithProvider);
 const statisticsComponent = new StatisticsComponent({tasks: tasksModel, dateFrom, dateTo});
 
 render(siteHeaderElement, mainMenuComponent);
@@ -60,7 +62,7 @@ mainMenuComponent.setOnChangeHandler((menuItem) => {
   return;
 });
 
-api.getTasks()
+apiWithProvider.getTasks()
   .then((tasks) => {
     tasksModel.setTasks(tasks);
     boardController.render();
