@@ -20,7 +20,14 @@ export default class Store {
         ));
   }
 
-  // removeItem(key) {
-
-  // }
+  removeItem(key) {
+    const store = this.getItems();
+    // Удаляем из объекта свойство с нужным id (key)
+    delete store[key];
+    // Перезаписываем в хранилище измененный объект
+    this._storage.setItem(
+        this._storageKey,
+        JSON.stringify(store)
+    );
+  }
 }
