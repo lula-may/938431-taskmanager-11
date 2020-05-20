@@ -5,12 +5,16 @@ import FilterController from "./controllers/filter.js";
 import MainMenuComponent, {MenuItem} from "./components/main-menu.js";
 import Provider from "./api/provider.js";
 import StatisticsComponent from "./components/statistics.js";
+import Store from "./api/store.js";
 import TasksModel from "./models/tasks.js";
 import {render} from "./utils/render.js";
 import {FilterType} from "./const.js";
 
 const END_POINT = `https://11.ecmascript.pages.academy/task-manager`;
 const AUTHORIZATION = `Basic dk8Sdapo84Ed6bL`;
+const STORE_PREFIX = `taskmanager-localstorage`;
+const STORE_VERSION = `v1`;
+const STORE_NAME = `${STORE_PREFIX}-${STORE_VERSION}`;
 
 const dateTo = new Date();
 const dateFrom = (() => {
@@ -23,7 +27,8 @@ const siteMainElement = document.querySelector(`.main`);
 const siteHeaderElement = siteMainElement.querySelector(`.main__control`);
 
 const api = new API(AUTHORIZATION, END_POINT);
-const apiWithProvider = new Provider(api);
+const store = new Store(STORE_NAME, window.localStorage);
+const apiWithProvider = new Provider(api, store);
 const tasksModel = new TasksModel();
 
 const mainMenuComponent = new MainMenuComponent();
