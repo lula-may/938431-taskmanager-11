@@ -20,6 +20,13 @@ export default class Store {
         ));
   }
 
+  setItems(unitedTasks) {
+    this._storage.setItem(
+        this._storageKey,
+        JSON.stringify(unitedTasks)
+    );
+  }
+
   removeItem(key) {
     const store = this.getItems();
     // Удаляем из объекта свойство с нужным id (key)

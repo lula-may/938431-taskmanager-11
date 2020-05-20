@@ -1,4 +1,5 @@
 import TaskModel from "../models/task.js";
+import {nanoid} from "nanoid";
 
 export default class Provider {
   constructor(api, store) {
@@ -10,7 +11,12 @@ export default class Provider {
     if (this._isOnline()) {
       return this._api.getTasks()
         .then((tasks) => {
-          tasks.forEach((task) => this._store.setItem(task.id, task.convertToRaw()));
+          // Конвертируем массив в объект с ключами - id
+          const unitedTasks = tasks.reduce((acc, task) => {
+            acc[task.id] = task;
+            return acc;
+          }, {});
+          this._store.setItems(unitedTasks);
           return tasks;
         });
     }
@@ -31,11 +37,18 @@ export default class Provider {
     return Promise.resolve(localTask);
   }
 
-  createTask(data) {
+  createTask(task) {
     if (this._isOnline()) {
-      return this._api.createTask(data);
+      return this._api.createTask(task)
+        .then((newTask) => {
+          this._store.setItem(newTask.id, newTask.convertToRaw());
+          return newTask;
+        });
     }
-    return Promise.reject(`Offline logic is not implemented`);
+    const localId = nanoid();
+    const localNewTask = TaskModel.clone(Object.assign(task, {id: localId}));
+    this._store.setItem(localId, localNewTask.convertToRaw());
+    return Promise.resolve(localNewTask);
   }
 
   deleteTask(id) {
