@@ -1,4 +1,4 @@
-import API from "./api/api.js";
+import API from "./api/index.js";
 import BoardComponent from "./components/board.js";
 import BoardController from "./controllers/board.js";
 import FilterController from "./controllers/filter.js";
@@ -73,10 +73,22 @@ apiWithProvider.getTasks()
     boardController.render();
   });
 
-// window.addEventListener(`load`, () => {
-//   navigator.serviceWorker.register(`./sw.js`)
-//   .then(() => {})
-//   .catch((err) => {
-//     throw err;
-//   });
-// });
+window.addEventListener(`offline`, () => {
+  document.title += ` [offline]`;
+});
+
+window.addEventListener(`online`, () => {
+  document.title = document.title.replace(` [offline]`, ``);
+  if (!apiWithProvider.isSyncNeeded) {
+    return;
+  }
+  apiWithProvider.sync();
+});
+
+window.addEventListener(`load`, () => {
+  navigator.serviceWorker.register(`./sw.js`)
+  .then(() => {})
+  .catch((err) => {
+    throw err;
+  });
+});
