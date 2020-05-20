@@ -92,6 +92,7 @@ export default class Provider {
           const items = createStorageStructure([...createdTasks, ...updatedTasks]);
 
           this._store.setItems(items);
+          this._isSyncNeeded = false;
         });
     }
     return Promise.reject(`Sync data failed`);
