@@ -20,7 +20,7 @@ export default class Store {
         ));
   }
 
-  removeItem(key) {
+  // removeItem(key) {
 
-  }
+  // }
 }

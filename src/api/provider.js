@@ -1,7 +1,5 @@
 import TaskModel from "../models/task.js";
 
-const isOnline = () => window.navigator.onLine;
-
 export default class Provider {
   constructor(api, store) {
     this._api = api;
@@ -9,7 +7,7 @@ export default class Provider {
   }
 
   getTasks() {
-    if (isOnline()) {
+    if (this._isOnline()) {
       return this._api.getTasks()
         .then((tasks) => {
           tasks.forEach((task) => this._store.setItem(task.id, task.convertToRaw()));
@@ -20,24 +18,34 @@ export default class Provider {
     return Promise.resolve(TaskModel.parseTasks(storedTasks));
   }
 
-  updateTasks(id, data) {
-    if (isOnline()) {
-      return this._api.updateTasks(id, data);
+  updateTask(id, task) {
+    if (this._isOnline()) {
+      return this._api.updateTask(id, task)
+        .then((newTask) => {
+          this._store.setItem(newTask.id, newTask.convertToRaw());
+          return newTask;
+        });
     }
-    return Promise.reject(`Offline logic is not implemented`);
+    const localTask = TaskModel.clone(Object.assign(task, {id}));
+    this._store.setItem(id, localTask.convertToRaw());
+    return Promise.resolve(localTask);
   }
 
   createTask(data) {
-    if (isOnline()) {
+    if (this._isOnline()) {
       return this._api.createTask(data);
     }
     return Promise.reject(`Offline logic is not implemented`);
   }
 
   deleteTask(id) {
-    if (isOnline()) {
+    if (this._isOnline()) {
       return this._api.deleteTask(id);
     }
     return Promise.reject(`Offline logic is not implemented`);
+  }
+
+  _isOnline() {
+    return window.navigator.onLine;
   }
 }

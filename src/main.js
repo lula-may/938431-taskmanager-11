@@ -11,7 +11,7 @@ import {render} from "./utils/render.js";
 import {FilterType} from "./const.js";
 
 const END_POINT = `https://11.ecmascript.pages.academy/task-manager`;
-const AUTHORIZATION = `Basic dk8Sdapo84Ed6bL`;
+const AUTHORIZATION = `Basic dk8Sdapr84Ed6bL`;
 const STORE_PREFIX = `taskmanager-localstorage`;
 const STORE_VERSION = `v1`;
 const STORE_NAME = `${STORE_PREFIX}-${STORE_VERSION}`;
@@ -73,10 +73,10 @@ apiWithProvider.getTasks()
     boardController.render();
   });
 
-window.addEventListener(`load`, () => {
-  navigator.serviceWorker.register(`./sw.js`)
-  .then(() => {})
-  .catch((err) => {
-    throw err;
-  });
-});
+// window.addEventListener(`load`, () => {
+//   navigator.serviceWorker.register(`./sw.js`)
+//   .then(() => {})
+//   .catch((err) => {
+//     throw err;
+//   });
+// });
