@@ -15,21 +15,21 @@ self.addEventListener(`install`, (evt) => {
       .then((cache) => {
         // Записываем в кэш все статические ресурсы
         return cache.addAll([
-          `/`,
-          `/index.html`,
-          `/bundle.js`,
-          `/css/normalize.css`,
-          `/css/style.css`,
-          `/fonts/HelveticaNeueCyr-Bold.woff`,
-          `/fonts/HelveticaNeueCyr-Bold.woff2`,
-          `/fonts/HelveticaNeueCyr-Medium.woff`,
-          `/fonts/HelveticaNeueCyr-Medium.woff2`,
-          `/fonts/HelveticaNeueCyr-Roman.woff`,
-          `/fonts/HelveticaNeueCyr-Roman.woff2`,
-          `/img/add-photo.svg`,
-          `/img/close.svg`,
-          `/img/sample-img.jpg`,
-          `/img/wave.svg`
+          `./`,
+          `./index.html`,
+          `./bundle.js`,
+          `./css/normalize.css`,
+          `./css/style.css`,
+          `./fonts/HelveticaNeueCyr-Bold.woff`,
+          `./fonts/HelveticaNeueCyr-Bold.woff2`,
+          `./fonts/HelveticaNeueCyr-Medium.woff`,
+          `./fonts/HelveticaNeueCyr-Medium.woff2`,
+          `./fonts/HelveticaNeueCyr-Roman.woff`,
+          `./fonts/HelveticaNeueCyr-Roman.woff2`,
+          `./img/add-photo.svg`,
+          `./img/close.svg`,
+          `./img/sample-img.jpg`,
+          `./img/wave.svg`
         ]);
       })
   );
